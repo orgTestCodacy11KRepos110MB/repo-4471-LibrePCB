@@ -299,6 +299,8 @@ add_library(
   network/repository.cpp
   network/repository.h
   norms.h
+  project/board/3d/boardshape3d.cpp
+  project/board/3d/boardshape3d.h
   project/board/board.cpp
   project/board/board.h
   project/board/boardairwiresbuilder.cpp
@@ -513,6 +515,65 @@ target_link_libraries(
          Optional::Optional
          Polyclipping::Polyclipping
          TypeSafe::TypeSafe
+         TKernel
+         TKMath
+         TKG2d
+         TKG3d
+         TKGeomBase
+         TKBRep
+         TKGeomAlgo
+         TKTopAlgo
+         TKPrim
+         TKBO
+         TKShHealing
+         TKBool
+         TKHLR
+         TKFillet
+         TKOffset
+         TKFeat
+         TKMesh
+         TKXMesh
+         TKService
+         TKV3d
+         TKOpenGl
+         TKMeshVS
+         # TKIVtk
+         TKCDF
+         TKLCAF
+         TKCAF
+         TKBinL
+         TKXmlL
+         TKBin
+         TKXml
+         TKStdL
+         TKStd
+         TKTObj
+         TKBinTObj
+         TKXmlTObj
+         TKVCAF
+         TKXSBase
+         TKSTEPBase
+         TKSTEPAttr
+         TKSTEP209
+         TKSTEP
+         TKIGES
+         TKXCAF
+         TKXDEIGES
+         TKXDESTEP
+         TKSTL
+         TKVRML
+         TKXmlXCAF
+         TKBinXCAF
+         TKRWMesh
+         TKDraw
+         TKTopTest
+         TKViewerTest
+         TKXSDRAW
+         TKDCAF
+         TKXDEDRAW
+         TKTObjDRAW
+         TKQADraw
+         # TKIVtkDraw
          # Qt
          Qt5::Concurrent
          Qt5::Core
@@ -522,6 +583,7 @@ target_link_libraries(
          Qt5::Sql
          Qt5::Svg
          Qt5::Widgets
+         Qt5::OpenGL # TODO: Remove me!
          # Link with -lproc on SunOS / Solaris / Illumos
          # This is required for proc_get_psinfo
          $<$<STREQUAL:$<PLATFORM_ID>,SunOS>:proc>

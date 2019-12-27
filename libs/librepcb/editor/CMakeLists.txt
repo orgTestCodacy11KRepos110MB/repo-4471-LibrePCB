@@ -395,6 +395,9 @@ add_library(
   project/boardeditor/unplacedcomponentsdock.cpp
   project/boardeditor/unplacedcomponentsdock.h
   project/boardeditor/unplacedcomponentsdock.ui
+  project/boardviewer/boardviewer.cpp
+  project/boardviewer/boardviewer.h
+  project/boardviewer/boardviewer.ui
   project/bomgeneratordialog.cpp
   project/bomgeneratordialog.h
   project/bomgeneratordialog.ui
@@ -679,6 +682,8 @@ add_library(
   widgets/lengtheditbase.h
   widgets/numbereditbase.cpp
   widgets/numbereditbase.h
+  widgets/opencascadeview.cpp
+  widgets/opencascadeview.h
   widgets/patheditorwidget.cpp
   widgets/patheditorwidget.h
   widgets/plaintextedit.cpp

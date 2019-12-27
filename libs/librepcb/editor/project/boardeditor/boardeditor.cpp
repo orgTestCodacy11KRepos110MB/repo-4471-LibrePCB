@@ -37,6 +37,7 @@
 #include "../../widgets/graphicsview.h"
 #include "../../widgets/searchtoolbar.h"
 #include "../../workspace/desktopservices.h"
+#include "../boardviewer/boardviewer.h"
 #include "../bomgeneratordialog.h"
 #include "../erc/ercmsgdock.h"
 #include "../projecteditor.h"
@@ -163,6 +164,13 @@ BoardEditor::BoardEditor(ProjectEditor& projectEditor, Project& project)
   // mGraphicsView->zoomAll(); does not work properly here, should be executed
   // later in the event loop (ugly, but seems to work...)
   QTimer::singleShot(200, mUi->graphicsView, &GraphicsView::zoomAll);
+
+  if (Board* board = getActiveBoard()) {
+    BoardViewer* viewer = new BoardViewer(*board);
+    viewer->show();
+    viewer->raise();
+    viewer->activateWindow();
+  }
 }
 
 BoardEditor::~BoardEditor() {
