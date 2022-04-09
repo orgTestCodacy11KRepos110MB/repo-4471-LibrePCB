@@ -95,7 +95,9 @@ public:
 
   // Getters
   const FilePath& getFilePath() const noexcept { return mFilePath; }
-  bool isDirty() const noexcept { return !mUndoStack->isClean(); }
+  bool isDirty() const noexcept {
+    return mManualModificationsMade || (!mUndoStack->isClean());
+  }
   virtual bool hasGraphicalEditor() const noexcept { return false; }
   virtual bool supportsFlip() const noexcept { return false; }
 
@@ -138,6 +140,9 @@ protected:  // Methods
     return false;
   }
   virtual bool runChecks(LibraryElementCheckMessageList& msgs) const = 0;
+  void setMessageApproved(LibraryBaseElement& element,
+                          std::shared_ptr<const LibraryElementCheckMessage> msg,
+                          bool approve) noexcept;
   virtual bool execGraphicsExportDialog(GraphicsExportDialog::Output output,
                                         const QString& settingsKey) noexcept {
     Q_UNUSED(output);
@@ -191,7 +196,12 @@ protected:  // Data
   ExclusiveActionGroup* mToolsActionGroup;
   StatusBar* mStatusBar;
   QScopedPointer<ToolBarProxy> mCommandToolBarProxy;
+  bool mManualModificationsMade;  ///< Modifications bypassing the undo stack.
   bool mIsInterfaceBroken;
+
+  // Memorized message approvals
+  QSet<SExpression> mSupportedApprovals;
+  QSet<SExpression> mDisappearedApprovals;
 };
 
 /*******************************************************************************

@@ -99,6 +99,10 @@ PackageCategoryEditorWidget::~PackageCategoryEditorWidget() noexcept {
  ******************************************************************************/
 
 bool PackageCategoryEditorWidget::save() noexcept {
+  // Remove obsolete message approvals (bypassing the undo stack).
+  mCategory->setApprovedMessages(mCategory->getApprovedMessages() -
+                                 mDisappearedApprovals);
+
   // Commit metadata.
   QString errorMsg = commitMetadata();
   if (!errorMsg.isEmpty()) {
@@ -130,6 +134,7 @@ void PackageCategoryEditorWidget::updateMetadata() noexcept {
   mUi->edtAuthor->setText(mCategory->getAuthor());
   mUi->edtVersion->setText(mCategory->getVersion().toStr());
   mUi->cbxDeprecated->setChecked(mCategory->isDeprecated());
+  mUi->lstMessages->setApprovals(mCategory->getApprovedMessages());
   mParentUuid = mCategory->getParentUuid();
   updateCategoryLabel();
 }
@@ -202,6 +207,13 @@ bool PackageCategoryEditorWidget::processCheckMessage(
   if (fixMsgHelper<MsgNameNotTitleCase>(msg, applyFix)) return true;
   if (fixMsgHelper<MsgMissingAuthor>(msg, applyFix)) return true;
   return false;
+}
+
+void PackageCategoryEditorWidget::libraryElementCheckApproveRequested(
+    std::shared_ptr<const LibraryElementCheckMessage> msg,
+    bool approve) noexcept {
+  setMessageApproved(*mCategory, msg, approve);
+  updateMetadata();
 }
 
 void PackageCategoryEditorWidget::btnChooseParentCategoryClicked() noexcept {

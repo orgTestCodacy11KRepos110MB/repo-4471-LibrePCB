@@ -172,6 +172,10 @@ void LibraryOverviewWidget::setFilter(const QString& filter) noexcept {
  ******************************************************************************/
 
 bool LibraryOverviewWidget::save() noexcept {
+  // Remove obsolete message approvals (bypassing the undo stack).
+  mLibrary->setApprovedMessages(mLibrary->getApprovedMessages() -
+                                mDisappearedApprovals);
+
   // Commit metadata.
   QString errorMsg = commitMetadata();
   if (!errorMsg.isEmpty()) {
@@ -224,6 +228,7 @@ void LibraryOverviewWidget::updateMetadata() noexcept {
   mUi->edtVersion->setText(mLibrary->getVersion().toStr());
   mUi->cbxDeprecated->setChecked(mLibrary->isDeprecated());
   mUi->edtUrl->setText(mLibrary->getUrl().toString());
+  mUi->lstMessages->setApprovals(mLibrary->getApprovedMessages());
   mDependenciesEditorWidget->setUuids(mLibrary->getDependencies());
   mIcon = mLibrary->getIcon();
 }
@@ -297,6 +302,13 @@ bool LibraryOverviewWidget::processCheckMessage(
   if (fixMsgHelper<MsgNameNotTitleCase>(msg, applyFix)) return true;
   if (fixMsgHelper<MsgMissingAuthor>(msg, applyFix)) return true;
   return false;
+}
+
+void LibraryOverviewWidget::libraryElementCheckApproveRequested(
+    std::shared_ptr<const LibraryElementCheckMessage> msg,
+    bool approve) noexcept {
+  setMessageApproved(*mLibrary, msg, approve);
+  updateMetadata();
 }
 
 void LibraryOverviewWidget::updateElementLists() noexcept {

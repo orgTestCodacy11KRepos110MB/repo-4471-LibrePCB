@@ -148,6 +148,10 @@ DeviceEditorWidget::~DeviceEditorWidget() noexcept {
  ******************************************************************************/
 
 bool DeviceEditorWidget::save() noexcept {
+  // Remove obsolete message approvals (bypassing the undo stack).
+  mDevice->setApprovedMessages(mDevice->getApprovedMessages() -
+                               mDisappearedApprovals);
+
   // Commit metadata.
   QString errorMsg = commitMetadata();
   if (!errorMsg.isEmpty()) {
@@ -198,6 +202,7 @@ void DeviceEditorWidget::updateMetadata() noexcept {
   mUi->edtAuthor->setText(mDevice->getAuthor());
   mUi->edtVersion->setText(mDevice->getVersion().toStr());
   mUi->cbxDeprecated->setChecked(mDevice->isDeprecated());
+  mUi->lstMessages->setApprovals(mDevice->getApprovedMessages());
   mCategoriesEditorWidget->setUuids(mDevice->getCategories());
 }
 
@@ -465,6 +470,13 @@ bool DeviceEditorWidget::processCheckMessage(
   if (fixMsgHelper<MsgMissingAuthor>(msg, applyFix)) return true;
   if (fixMsgHelper<MsgMissingCategories>(msg, applyFix)) return true;
   return false;
+}
+
+void DeviceEditorWidget::libraryElementCheckApproveRequested(
+    std::shared_ptr<const LibraryElementCheckMessage> msg,
+    bool approve) noexcept {
+  setMessageApproved(*mDevice, msg, approve);
+  updateMetadata();
 }
 
 /*******************************************************************************

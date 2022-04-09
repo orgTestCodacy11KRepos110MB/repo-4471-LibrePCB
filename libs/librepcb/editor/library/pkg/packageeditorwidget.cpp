@@ -214,6 +214,10 @@ void PackageEditorWidget::setStatusBar(StatusBar* statusbar) noexcept {
  ******************************************************************************/
 
 bool PackageEditorWidget::save() noexcept {
+  // Remove obsolete message approvals (bypassing the undo stack).
+  mPackage->setApprovedMessages(mPackage->getApprovedMessages() -
+                                mDisappearedApprovals);
+
   // Commit metadata.
   QString errorMsg = commitMetadata();
   if (!errorMsg.isEmpty()) {
@@ -318,6 +322,7 @@ void PackageEditorWidget::updateMetadata() noexcept {
   mUi->edtAuthor->setText(mPackage->getAuthor());
   mUi->edtVersion->setText(mPackage->getVersion().toStr());
   mUi->cbxDeprecated->setChecked(mPackage->isDeprecated());
+  mUi->lstMessages->setApprovals(mPackage->getApprovedMessages());
   mCategoriesEditorWidget->setUuids(mPackage->getCategories());
 }
 
@@ -532,6 +537,13 @@ bool PackageEditorWidget::processCheckMessage(
   if (fixMsgHelper<MsgMissingFootprintValue>(msg, applyFix)) return true;
   if (fixMsgHelper<MsgWrongFootprintTextLayer>(msg, applyFix)) return true;
   return false;
+}
+
+void PackageEditorWidget::libraryElementCheckApproveRequested(
+    std::shared_ptr<const LibraryElementCheckMessage> msg,
+    bool approve) noexcept {
+  setMessageApproved(*mPackage, msg, approve);
+  updateMetadata();
 }
 
 bool PackageEditorWidget::execGraphicsExportDialog(
