@@ -89,6 +89,9 @@ public:
   }
   const LocalizedKeywordsMap& getKeywords() const noexcept { return mKeywords; }
   QStringList getAllAvailableLocales() const noexcept;
+  const QSet<SExpression>& getApprovedMessages() const noexcept {
+    return mApprovedMessages;
+  }
 
   // Setters
   void setVersion(const Version& version) noexcept { mVersion = version; }
@@ -100,6 +103,9 @@ public:
   }
   void setKeywords(const LocalizedKeywordsMap& keywords) noexcept {
     mKeywords = keywords;
+  }
+  void setApprovedMessages(const QSet<SExpression>& approvals) noexcept {
+    mApprovedMessages = approvals;
   }
 
   // General Methods
@@ -133,6 +139,8 @@ protected:
   /// @copydoc ::librepcb::SerializableObject::serialize()
   virtual void serialize(SExpression& root) const override;
 
+  void serializeApprovedMessages(SExpression& root) const;
+
   // General Attributes
   std::unique_ptr<TransactionalDirectory> mDirectory;
   bool mDirectoryNameMustBeUuid;
@@ -152,6 +160,9 @@ protected:
   LocalizedNameMap mNames;
   LocalizedDescriptionMap mDescriptions;
   LocalizedKeywordsMap mKeywords;
+
+  // Library element check
+  QSet<SExpression> mApprovedMessages;
 };
 
 /*******************************************************************************

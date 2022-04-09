@@ -204,6 +204,8 @@ void Symbol::serialize(SExpression& root) const {
   root.ensureLineBreak();
   mTexts.serialize(root);
   root.ensureLineBreak();
+  serializeApprovedMessages(root);
+  root.ensureLineBreak();
 }
 
 /*******************************************************************************

@@ -103,6 +103,8 @@ void Device::serialize(SExpression& root) const {
   root.ensureLineBreak();
   mPadSignalMap.sortedByUuid().serialize(root);
   root.ensureLineBreak();
+  serializeApprovedMessages(root);
+  root.ensureLineBreak();
 }
 
 /*******************************************************************************

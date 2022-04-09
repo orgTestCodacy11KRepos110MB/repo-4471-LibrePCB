@@ -25,6 +25,7 @@
 #include "../application.h"
 #include "../fileio/versionfile.h"
 #include "../serialization/sexpression.h"
+#include "../utils/toolbox.h"
 #include "librarybaseelementcheck.h"
 
 #include <QtCore>
@@ -57,7 +58,8 @@ LibraryBaseElement::LibraryBaseElement(
     mIsDeprecated(false),
     mNames(name_en_US),
     mDescriptions(description_en_US),
-    mKeywords(keywords_en_US) {
+    mKeywords(keywords_en_US),
+    mApprovedMessages() {
 }
 
 LibraryBaseElement::LibraryBaseElement(
@@ -77,7 +79,8 @@ LibraryBaseElement::LibraryBaseElement(
     mNames(ElementName(
         "unknown")),  // just for initialization, will be overwritten
     mDescriptions(""),
-    mKeywords("") {
+    mKeywords(""),
+    mApprovedMessages() {
   // determine the filename of the version file
   QString versionFileName = ".librepcb-" % mShortElementName;
 
@@ -133,6 +136,10 @@ LibraryBaseElement::LibraryBaseElement(
   mDescriptions =
       LocalizedDescriptionMap(mLoadingFileDocument, mLoadingFileFormat);
   mKeywords = LocalizedKeywordsMap(mLoadingFileDocument, mLoadingFileFormat);
+
+  // Read approved messages.
+  mApprovedMessages =
+      Toolbox::toSet(mLoadingFileDocument.getChildren("approved_message"));
 
   // check if the UUID equals to the directory basename
   if (mDirectoryNameMustBeUuid && (mUuid.toStr() != dirUuidStr)) {
@@ -226,6 +233,14 @@ void LibraryBaseElement::serialize(SExpression& root) const {
   root.appendChild("created", mCreated);
   root.ensureLineBreak();
   root.appendChild("deprecated", mIsDeprecated);
+  root.ensureLineBreak();
+}
+
+void LibraryBaseElement::serializeApprovedMessages(SExpression& root) const {
+  foreach (const SExpression& node, Toolbox::sortedQSet(mApprovedMessages)) {
+    root.ensureLineBreak();
+    root.appendChild(node);
+  }
   root.ensureLineBreak();
 }
 

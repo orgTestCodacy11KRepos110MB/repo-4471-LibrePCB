@@ -76,6 +76,8 @@ void Package::serialize(SExpression& root) const {
   root.ensureLineBreak();
   mFootprints.serialize(root);
   root.ensureLineBreak();
+  serializeApprovedMessages(root);
+  root.ensureLineBreak();
 }
 
 /*******************************************************************************

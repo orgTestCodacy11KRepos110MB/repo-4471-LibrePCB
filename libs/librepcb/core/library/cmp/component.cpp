@@ -151,6 +151,8 @@ void Component::serialize(SExpression& root) const {
   root.ensureLineBreak();
   mSymbolVariants.serialize(root);
   root.ensureLineBreak();
+  serializeApprovedMessages(root);
+  root.ensureLineBreak();
 }
 
 QString Component::cleanNorm(QString norm) noexcept {
