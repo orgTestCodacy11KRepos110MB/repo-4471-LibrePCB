@@ -65,11 +65,11 @@ private:  // Methods
                    const QString& pcbFabricationSettingsPath,
                    const QStringList& boards, bool save, bool strict) const
       noexcept;
-  bool openLibrary(const QString& libDir, bool all, bool save,
+  bool openLibrary(const QString& libDir, bool all, bool runCheck, bool save,
                    bool strict) const noexcept;
   void processLibraryElement(const QString& libDir, TransactionalFileSystem& fs,
-                             LibraryBaseElement& element, bool save,
-                             bool strict, bool& success) const;
+                             LibraryBaseElement& element, bool runCheck,
+                             bool save, bool strict, bool& success) const;
   static QString prettyPath(const FilePath& path,
                             const QString& style) noexcept;
   static bool failIfFileFormatUnstable() noexcept;
