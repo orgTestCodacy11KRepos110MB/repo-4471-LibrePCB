@@ -26,6 +26,8 @@
 
 #include <QtCore>
 
+#include <algorithm>
+
 /*******************************************************************************
  *  Namespace
  ******************************************************************************/
@@ -194,6 +196,34 @@ SExpression& SExpression::operator=(const SExpression& rhs) noexcept {
   mChildren = rhs.mChildren;
   mFilePath = rhs.mFilePath;
   return *this;
+}
+
+bool SExpression::operator==(const SExpression& rhs) const noexcept {
+  if (mType != rhs.mType) return false;
+  if (mValue != rhs.mValue) return false;
+  if (mChildren != rhs.mChildren) return false;
+  // Filepath is not relevant so we don't take it into account.
+  return true;
+}
+
+bool SExpression::operator!=(const SExpression& rhs) const noexcept {
+  return !((*this) == rhs);
+}
+
+bool SExpression::operator<(const SExpression& rhs) const noexcept {
+  if (mType != rhs.mType) {
+    return static_cast<int>(mType) < static_cast<int>(rhs.mType);
+  } else if (mValue != rhs.mValue) {
+    return mValue < rhs.mValue;
+  } else {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
+    return mChildren < rhs.mChildren;
+#else
+    return std::lexicographical_compare(mChildren.begin(), mChildren.end(),
+                                        rhs.mChildren.begin(),
+                                        rhs.mChildren.end());
+#endif
+  }
 }
 
 /*******************************************************************************

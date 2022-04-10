@@ -177,6 +177,9 @@ public:
 
   // Operator Overloadings
   SExpression& operator=(const SExpression& rhs) noexcept;
+  bool operator==(const SExpression& rhs) const noexcept;
+  bool operator!=(const SExpression& rhs) const noexcept;
+  bool operator<(const SExpression& rhs) const noexcept;
 
   // Static Methods
   static SExpression createList(const QString& name);
@@ -339,6 +342,28 @@ inline QUrl deserialize(const SExpression& sexpr, const Version& fileFormat) {
     return obj;
   } else
     throw RuntimeError(__FILE__, __LINE__, SExpression::tr("Not a valid URL."));
+}
+
+/*******************************************************************************
+ *  Various Methods
+ ******************************************************************************/
+
+inline uint qHash(const SExpression& node, uint seed = 0) noexcept {
+  switch (node.getType()) {
+    case SExpression::Type::LineBreak:
+      return ::qHash(static_cast<int>(node.getType()), seed);
+    case SExpression::Type::String:
+    case SExpression::Type::Token:
+      return ::qHash(
+          qMakePair(static_cast<int>(node.getType()), node.getValue()), seed);
+    case SExpression::Type::List: {
+      const auto& children = node.getChildren();
+      return ::qHashRange(children.begin(), children.end(), seed);
+    }
+    default:
+      Q_ASSERT(false);
+      return 0;
+  }
 }
 
 /*******************************************************************************
