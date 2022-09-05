@@ -30,6 +30,7 @@
 #include <librepcb/core/export/graphicsexport.h>
 #include <librepcb/core/fileio/csvfile.h>
 #include <librepcb/core/fileio/fileutils.h>
+#include <librepcb/core/graphics/graphicslayer.h>
 #include <librepcb/core/fileio/transactionalfilesystem.h>
 #include <librepcb/core/library/cat/componentcategory.h>
 #include <librepcb/core/library/cat/packagecategory.h>
@@ -41,6 +42,8 @@
 #include <librepcb/core/project/board/board.h>
 #include <librepcb/core/project/board/boardfabricationoutputsettings.h>
 #include <librepcb/core/project/board/boardgerberexport.h>
+#include <librepcb/core/project/board/boardpainter.h>
+#include <librepcb/core/project/board/boardpreviewpainter.h>
 #include <librepcb/core/project/bomgenerator.h>
 #include <librepcb/core/project/erc/ercmsg.h>
 #include <librepcb/core/project/erc/ercmsglist.h>
@@ -95,6 +98,12 @@ int CommandLineInterface::execute() noexcept {
       tr("Run the electrical rule check, print all non-approved "
          "warnings/errors and "
          "report failure (exit code = 1) if there are non-approved messages."));
+  QCommandLineOption exportBoardOption(
+      "export-board",
+      tr("Export boards to given file(s). Existing files will be "
+         "overwritten. Supported file extensions: %1")
+          .arg(GraphicsExport::getSupportedExtensions().join(", ")),
+      tr("file"));
   QCommandLineOption exportSchematicsOption(
       "export-schematics",
       tr("Export schematics to given file(s). Existing files will be "
@@ -176,6 +185,7 @@ int CommandLineInterface::execute() noexcept {
     parser.addPositionalArgument("project",
                                  tr("Path to project file (*.lpp[z])."));
     parser.addOption(ercOption);
+    parser.addOption(exportBoardOption);
     parser.addOption(exportSchematicsOption);
     parser.addOption(exportBomOption);
     parser.addOption(exportBoardBomOption);
@@ -245,6 +255,7 @@ int CommandLineInterface::execute() noexcept {
     cmdSuccess = openProject(
         positionalArgs.value(0),  // project filepath
         parser.isSet(ercOption),  // run ERC
+        parser.values(exportBoardOption),  // export board
         parser.values(exportSchematicsOption),  // export schematics
         parser.values(exportBomOption),  // export generic BOM
         parser.values(exportBoardBomOption),  // export board BOM
@@ -284,6 +295,7 @@ int CommandLineInterface::execute() noexcept {
 
 bool CommandLineInterface::openProject(
     const QString& projectFile, bool runErc,
+    const QStringList& exportBoardFiles,
     const QStringList& exportSchematicsFiles, const QStringList& exportBomFiles,
     const QStringList& exportBoardBomFiles, const QString& bomAttributes,
     bool exportPcbFabricationData, const QString& pcbFabricationSettingsPath,
@@ -421,6 +433,55 @@ bool CommandLineInterface::openProject(
         } else {
           printErr(
               tr("ERROR: No board with the name '%1' found.").arg(boardName));
+          success = false;
+        }
+      }
+    }
+
+    // Export board
+    foreach (const QString& destStr, exportBoardFiles) {
+      print(tr("Export board to '%1'...").arg(destStr));
+      foreach (const Board* board, boardList) {
+        QString destPathStr = AttributeSubstitutor::substitute(
+            destStr, board, [&](const QString& str) {
+              return FilePath::cleanFileName(
+                  str, FilePath::ReplaceSpaces | FilePath::KeepCase);
+            });
+        FilePath destPath(QFileInfo(destPathStr).absoluteFilePath());
+        GraphicsExport graphicsExport;
+        graphicsExport.setDocumentName(*project.getMetadata().getName());
+        QObject::connect(
+            &graphicsExport, &GraphicsExport::savingFile,
+            [&destPathStr, &writtenFilesCounter](const FilePath& fp) {
+              print(QString("  => '%1'").arg(prettyPath(fp, destPathStr)));
+              writtenFilesCounter[fp]++;
+            });
+        std::shared_ptr<GraphicsExportSettings> settings =
+            std::make_shared<GraphicsExportSettings>();
+        // Slightly modify default export settings for boards.
+        settings->setMarginLeft(UnsignedLength(5000000));
+        settings->setMarginTop(UnsignedLength(5000000));
+        settings->setMarginRight(UnsignedLength(5000000));
+        settings->setMarginBottom(UnsignedLength(5000000));
+
+        settings->setLayers(QList<std::pair<QString, QColor>>{
+            {QString(GraphicsLayer::sTopNames), Qt::white},
+            {QString(GraphicsLayer::sTopPlacement), Qt::white},
+            {QString(GraphicsLayer::sTopSolderPaste), Qt::gray},
+            {QString(GraphicsLayer::sTopStopMask), QColor(0, 200, 0, 100)},
+            {QString(GraphicsLayer::sTopCopper), Qt::red},
+            {QString(GraphicsLayer::sBoardPadsTht), Qt::red},
+            {QString(GraphicsLayer::sBoardViasTht), Qt::red},
+            {QString(GraphicsLayer::sBoardOutlines), Qt::darkGray},
+        });
+
+        GraphicsExport::Pages pages;
+        pages.append(
+            std::make_pair(std::make_shared<BoardPreviewPainter>(*board), settings));
+        graphicsExport.startExport(pages, destPath);
+        const QString errorMsg = graphicsExport.waitForFinished();
+        if (!errorMsg.isEmpty()) {
+          printErr("  " % tr("ERROR") % ": " % errorMsg);
           success = false;
         }
       }

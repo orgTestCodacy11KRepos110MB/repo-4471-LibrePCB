@@ -58,6 +58,7 @@ public:
 
 private:  // Methods
   bool openProject(const QString& projectFile, bool runErc,
+                   const QStringList& exportBoardFiles,
                    const QStringList& exportSchematicsFiles,
                    const QStringList& exportBomFiles,
                    const QStringList& exportBoardBomFiles,

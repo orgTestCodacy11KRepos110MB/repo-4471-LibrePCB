@@ -49,8 +49,7 @@ namespace librepcb {
  *  Constructors / Destructor
  ******************************************************************************/
 
-BoardClipperPathGenerator::BoardClipperPathGenerator(
-    Board& board, const PositiveLength& maxArcTolerance) noexcept
+BoardClipperPathGenerator::BoardClipperPathGenerator(const Board& board, const PositiveLength& maxArcTolerance) noexcept
   : mBoard(board), mMaxArcTolerance(maxArcTolerance), mPaths() {
 }
 

@@ -50,7 +50,7 @@ class BoardClipperPathGenerator final {
 public:
   // Constructors / Destructor
   explicit BoardClipperPathGenerator(
-      Board& board, const PositiveLength& maxArcTolerance) noexcept;
+      const Board& board, const PositiveLength& maxArcTolerance) noexcept;
   ~BoardClipperPathGenerator() noexcept;
 
   // Getters
@@ -62,7 +62,7 @@ public:
   void addCopper(const QString& layerName, const NetSignal* netsignal);
 
 private:  // Data
-  Board& mBoard;
+  const Board& mBoard;
   PositiveLength mMaxArcTolerance;
   ClipperLib::Paths mPaths;
 };

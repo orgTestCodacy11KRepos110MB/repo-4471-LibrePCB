@@ -61,6 +61,7 @@ public:
                        const ClipperLib::Paths& clip);
   static void offset(ClipperLib::Paths& paths, const Length& offset,
                      const PositiveLength& maxArcTolerance);
+  static std::unique_ptr<ClipperLib::PolyTree> area(const ClipperLib::Paths& paths);
   static ClipperLib::Paths flattenTree(const ClipperLib::PolyNode& node);
 
   // Type Conversions

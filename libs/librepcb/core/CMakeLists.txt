@@ -492,6 +492,7 @@ add_library(
   workspace/workspacesettingsitem_genericvaluelist.h
   workspace/workspacesettingsitem_keyboardshortcuts.cpp
   workspace/workspacesettingsitem_keyboardshortcuts.h
+  project/board/boardpreviewpainter.h project/board/boardpreviewpainter.cpp
 )
 target_include_directories(
   librepcb_core

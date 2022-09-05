@@ -117,6 +117,22 @@ void ClipperHelpers::offset(ClipperLib::Paths& paths, const Length& offset,
   }
 }
 
+std::unique_ptr<ClipperLib::PolyTree> ClipperHelpers::area(const ClipperLib::Paths& paths) {
+  try {
+    // Wrap the PolyTree object in a smart pointer since PolyTree cannot
+    // safely be copied (i.e. returned by value), it would lead to a crash!!!
+    std::unique_ptr<ClipperLib::PolyTree> result(new ClipperLib::PolyTree());
+    ClipperLib::Clipper c;
+    c.AddPaths(paths, ClipperLib::ptSubject, true);
+    c.Execute(ClipperLib::ctXor, *result, ClipperLib::pftEvenOdd,
+              ClipperLib::pftEvenOdd);
+    return result;
+  } catch (const std::exception& e) {
+    throw LogicError(__FILE__, __LINE__,
+                     tr("Failed to intersect paths: %1").arg(e.what()));
+  }
+}
+
 ClipperLib::Paths ClipperHelpers::flattenTree(
     const ClipperLib::PolyNode& node) {
   ClipperLib::Paths paths;
