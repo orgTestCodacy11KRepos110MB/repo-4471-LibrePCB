@@ -28,9 +28,8 @@
 #include <librepcb/core/workspace/workspacesettings.h>
 #include <librepcb/editor/dialogs/directorylockhandlerdialog.h>
 #include <librepcb/editor/editorcommandset.h>
-#include <librepcb/editor/workspace/controlpanel/controlpanel.h>
 #include <librepcb/editor/workspace/initializeworkspacewizard/initializeworkspacewizard.h>
-
+#include <librepcb/editor/mainwindow.h>
 #include <QtCore>
 #include <QtWidgets>
 
@@ -279,10 +278,10 @@ static int openWorkspace(FilePath& path) {
                    &WorkspaceSettingsItem::edited,
                    &ws.getSettings().keyboardShortcuts, applyKeyboardShortcuts);
 
-  // Open the control panel.
-  ControlPanel p(ws, wizard.getWorkspaceContainsNewerFileFormats());
-  QObject::connect(qApp, &Application::quitTriggered, &p, &ControlPanel::close);
-  p.show();
+  // Open the main window.
+  MainWindow w(ws, wizard.getWorkspaceContainsNewerFileFormats());
+  QObject::connect(qApp, &Application::quitTriggered, &w, &MainWindow::close);
+  w.show();
 
   return appExec();
 }

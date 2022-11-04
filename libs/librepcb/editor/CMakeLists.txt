@@ -576,6 +576,7 @@ add_library(
   project/erc/ercmsgdock.cpp
   project/erc/ercmsgdock.h
   project/erc/ercmsgdock.ui
+  mainwindow.h mainwindow.cpp mainwindow.ui
   project/newprojectwizard/newprojectwizard.cpp
   project/newprojectwizard/newprojectwizard.h
   project/newprojectwizard/newprojectwizard.ui
