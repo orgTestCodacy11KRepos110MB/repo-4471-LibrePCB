@@ -124,11 +124,11 @@ target_link_libraries(
           ParsEagle::ParsEagle
           QuaZip::QuaZip
           # Qt
-          Qt5::Concurrent
-          Qt5::Core
-          Qt5::Gui
-          Qt5::Test
-          Qt5::Widgets
+          Qt${Qt_VERSION_MAJOR}::Concurrent
+          Qt${Qt_VERSION_MAJOR}::Core
+          Qt${Qt_VERSION_MAJOR}::Gui
+          Qt${Qt_VERSION_MAJOR}::Test
+          Qt${Qt_VERSION_MAJOR}::Widgets
           # System
           Threads::Threads
 )

@@ -23,7 +23,7 @@ target_link_libraries(
   PUBLIC # LibrePCB
          LibrePCB::Core
          # Qt
-         Qt5::Core
+         Qt${Qt_VERSION_MAJOR}::Core
 )
 
 # Alias to namespaced variant

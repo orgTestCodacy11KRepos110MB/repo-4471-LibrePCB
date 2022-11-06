@@ -89,7 +89,7 @@ endif()
 
 # Find required Qt packages
 find_package(
-  Qt5 5.5.0
+  Qt NAMES Qt6 Qt5
   COMPONENTS Concurrent
              Gui
              LinguistTools
@@ -103,19 +103,19 @@ find_package(
 )
 if(BUILD_TESTS)
   find_package(
-    Qt5 5.5.0
+    Qt NAMES Qt6 Qt5
     COMPONENTS Test
     REQUIRED
   )
 endif()
-message(STATUS "Building with Qt${Qt5Core_VERSION}")
+message(STATUS "Building with Qt${Qt_VERSION}")
 
 # In Qt 5.15, a lot of things were marked as deprecated, without providing
 # alternatives available in previous Qt versions. It would require a lot of
 # preprocessor conditionals to avoid these deprecation warnings, so let's just
 # disable them for now. We are using CI anyway to ensure LibrePCB compiles with
 # the targeted Qt versions.
-if("${Qt5Core_VERSION_MAJOR}.${Qt5Core_VERSION_MINOR}" VERSION_GREATER 5.14)
+if("${Qt_VERSION_MAJOR}.${Qt_VERSION_MINOR}" VERSION_GREATER 5.14)
   target_compile_options(common INTERFACE -Wno-deprecated-declarations)
 endif()
 
@@ -132,7 +132,7 @@ if(BUILD_TESTS)
   find_package(GTest REQUIRED)
 endif()
 # Hoedown is only needed on Qt <5.14
-if(Qt5Core_VERSION VERSION_LESS 5.14)
+if(Qt_VERSION VERSION_LESS 5.14)
   message(STATUS "Qt <5.14 detected, using Hoedown for markdown support")
   find_package(Hoedown REQUIRED)
 endif()
@@ -164,11 +164,11 @@ file(
 set_source_files_properties(
   ${LIBREPCB_TS_FILES} PROPERTIES OUTPUT_LOCATION "${LIBREPCB_QM_FILES_DIR}"
 )
-if(Qt5_VERSION VERSION_LESS 5.12)
+if(Qt_VERSION VERSION_LESS 5.12)
   # Qt <5.12 doesn't support OPTIONS
   qt5_add_translation(LIBREPCB_QM_FILES ${LIBREPCB_TS_FILES})
 else()
-  qt5_add_translation(LIBREPCB_QM_FILES ${LIBREPCB_TS_FILES} OPTIONS -silent)
+  #qt5_add_translation(LIBREPCB_QM_FILES ${LIBREPCB_TS_FILES} OPTIONS -silent)
 endif()
 add_custom_target(librepcb_translations DEPENDS ${LIBREPCB_QM_FILES})
 add_dependencies(librepcb librepcb_translations)
