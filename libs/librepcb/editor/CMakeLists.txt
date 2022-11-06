@@ -800,6 +800,9 @@ target_link_libraries(
          Qt5::Svg
          Qt5::Network
          Qt5::Widgets
+         Qt5::Qml
+         Qt5::Quick
+         Qt5::QuickWidgets
 )
 
 # Hoedown is only needed on Qt <5.14

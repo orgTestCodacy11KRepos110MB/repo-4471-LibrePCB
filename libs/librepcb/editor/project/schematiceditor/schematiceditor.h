@@ -27,6 +27,9 @@
 #include "../../widgets/if_graphicsvieweventhandler.h"
 #include "ui_schematiceditor.h"
 
+#include <librepcb/core/types/gridproperties.h>
+#include <librepcb/editor/widgets/graphicsview.h>
+
 #include <QtCore>
 #include <QtWidgets>
 

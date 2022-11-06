@@ -99,6 +99,9 @@ find_package(
              Sql
              Svg
              Widgets
+             Qml
+             Quick
+             QuickWidgets
   REQUIRED
 )
 if(BUILD_TESTS)

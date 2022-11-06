@@ -18,7 +18,10 @@
     <normaloff>:/img/actions/schematic.png</normaloff>:/img/actions/schematic.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -35,9 +38,9 @@
      <widget class="librepcb::editor::MessageWidget" name="msgEmptySchematic" native="true"/>
     </item>
     <item>
-     <widget class="librepcb::editor::GraphicsView" name="graphicsView">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+     <widget class="QQuickWidget" name="quickWidget">
+      <property name="resizeMode">
+       <enum>QQuickWidget::SizeRootObjectToView</enum>
       </property>
      </widget>
     </item>
@@ -57,14 +60,14 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QQuickWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QtQuickWidgets/QQuickWidget</header>
+  </customwidget>
+  <customwidget>
    <class>librepcb::editor::StatusBar</class>
    <extends>QStatusBar</extends>
    <header location="global">librepcb/editor/widgets/statusbar.h</header>
-  </customwidget>
-  <customwidget>
-   <class>librepcb::editor::GraphicsView</class>
-   <extends>QGraphicsView</extends>
-   <header location="global">librepcb/editor/widgets/graphicsview.h</header>
   </customwidget>
   <customwidget>
    <class>librepcb::editor::MessageWidget</class>
