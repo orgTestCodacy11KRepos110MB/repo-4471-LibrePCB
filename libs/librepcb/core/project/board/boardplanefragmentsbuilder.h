@@ -36,7 +36,6 @@ namespace librepcb {
 
 class BI_FootprintPad;
 class BI_Plane;
-class BI_Via;
 
 /*******************************************************************************
  *  Class BoardPlaneFragmentsBuilder
@@ -70,7 +69,6 @@ private:  // Methods
 
   // Helper Methods
   ClipperLib::Path createPadCutOut(const BI_FootprintPad& pad) const noexcept;
-  ClipperLib::Path createViaCutOut(const BI_Via& via) const noexcept;
 
   /**
    * Returns the maximum allowed arc tolerance when flattening arcs. Do not

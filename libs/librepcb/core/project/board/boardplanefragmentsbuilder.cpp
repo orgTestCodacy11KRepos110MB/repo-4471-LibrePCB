@@ -185,12 +185,19 @@ void BoardPlaneFragmentsBuilder::subtractOtherObjects() {
            mPlane.getBoard().getNetSegments()) {
     // subtract vias
     foreach (const BI_Via* via, netsegment->getVias()) {
+      // Note: Vias shall not respect the plane connect style property,
+      // they are always connected solid. See discussion in
+      // https://github.com/LibrePCB/LibrePCB/issues/454.
       if (netsegment->getNetSignal() == &mPlane.getNetSignal()) {
         ClipperLib::Path path = ClipperHelpers::convert(
             via->getVia().getSceneOutline(), maxArcTolerance());
         mConnectedNetSignalAreas.push_back(path);
+      } else {
+        const ClipperLib::Path cutout = ClipperHelpers::convert(
+            via->getVia().getSceneOutline(*mPlane.getMinClearance()),
+            maxArcTolerance());
+        c.AddPath(cutout, ClipperLib::ptClip, true);
       }
-      c.AddPath(createViaCutOut(*via), ClipperLib::ptClip, true);
     }
 
     // subtract netlines
@@ -259,20 +266,6 @@ ClipperLib::Path BoardPlaneFragmentsBuilder::createPadCutOut(
       differentNetSignal) {
     return ClipperHelpers::convert(
         pad.getSceneOutline(*mPlane.getMinClearance()), maxArcTolerance());
-  } else {
-    return ClipperLib::Path();
-  }
-}
-
-ClipperLib::Path BoardPlaneFragmentsBuilder::createViaCutOut(
-    const BI_Via& via) const noexcept {
-  bool differentNetSignal =
-      (via.getNetSegment().getNetSignal() != &mPlane.getNetSignal());
-  if ((mPlane.getConnectStyle() == BI_Plane::ConnectStyle::None) ||
-      differentNetSignal) {
-    return ClipperHelpers::convert(
-        via.getVia().getSceneOutline(*mPlane.getMinClearance()),
-        maxArcTolerance());
   } else {
     return ClipperLib::Path();
   }
