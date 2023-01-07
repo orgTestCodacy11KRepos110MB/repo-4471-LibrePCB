@@ -54,9 +54,9 @@ class BI_Plane final : public BI_Base {
 public:
   // Types
   enum class ConnectStyle {
-    None,  ///< do not connect pads/vias to plane
-    // Thermal,    ///< add thermals to connect pads/vias to plane
-    Solid,  ///< completely connect pads/vias to plane
+    None,  ///< Do not connect pads to plane
+    ThermalRelief,  ///< Add thermal spokes to connect pads to plane
+    Solid,  ///< Completely connect pads to plane
   };
 
   // Constructors / Destructor
@@ -77,9 +77,12 @@ public:
   bool getKeepOrphans() const noexcept { return mKeepOrphans; }
   int getPriority() const noexcept { return mPriority; }
   ConnectStyle getConnectStyle() const noexcept { return mConnectStyle; }
-  // const Length& getThermalGapWidth() const noexcept {return
-  // mThermalGapWidth;} const Length& getThermalSpokeWidth() const noexcept
-  // {return mThermalSpokeWidth;}
+  const PositiveLength& getThermalGapWidth() const noexcept {
+    return mThermalGapWidth;
+  }
+  const PositiveLength& getThermalSpokeWidth() const noexcept {
+    return mThermalSpokeWidth;
+  }
   const Path& getOutline() const noexcept { return mOutline; }
   const QVector<Path>& getFragments() const noexcept { return mFragments; }
   BGI_Plane& getGraphicsItem() noexcept { return *mGraphicsItem; }
@@ -132,9 +135,8 @@ private:  // Data
   bool mKeepOrphans;
   int mPriority;
   ConnectStyle mConnectStyle;
-  // Length mThermalGapWidth;
-  // Length mThermalSpokeWidth;
-  // style [round square miter] ?
+  PositiveLength mThermalGapWidth;
+  PositiveLength mThermalSpokeWidth;
   QScopedPointer<BGI_Plane> mGraphicsItem;
   bool mIsVisible;  // volatile, not saved to file
 

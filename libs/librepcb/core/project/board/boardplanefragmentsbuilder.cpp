@@ -164,7 +164,7 @@ void BoardPlaneFragmentsBuilder::subtractOtherObjects() {
             ClipperHelpers::convert(pad->getSceneOutline(), maxArcTolerance());
         mConnectedNetSignalAreas.push_back(path);
       }
-      c.AddPath(createPadCutOut(*pad), ClipperLib::ptClip, true);
+      c.AddPaths(createPadCutOuts(*pad), ClipperLib::ptClip, true);
     }
   }
 
@@ -258,16 +258,40 @@ void BoardPlaneFragmentsBuilder::removeOrphans() {
  *  Helper Methods
  ******************************************************************************/
 
-ClipperLib::Path BoardPlaneFragmentsBuilder::createPadCutOut(
+ClipperLib::Paths BoardPlaneFragmentsBuilder::createPadCutOuts(
     const BI_FootprintPad& pad) const noexcept {
-  bool differentNetSignal =
+  const bool differentNetSignal =
       (pad.getCompSigInstNetSignal() != &mPlane.getNetSignal());
   if ((mPlane.getConnectStyle() == BI_Plane::ConnectStyle::None) ||
       differentNetSignal) {
-    return ClipperHelpers::convert(
-        pad.getSceneOutline(*mPlane.getMinClearance()), maxArcTolerance());
+    // No connection (full cutout)..
+    return {ClipperHelpers::convert(
+        pad.getSceneOutline(*mPlane.getMinClearance()), maxArcTolerance())};
+  } else if (mPlane.getConnectStyle() ==
+             BI_Plane::ConnectStyle::ThermalRelief) {
+    // Thermal relief connection.
+    ClipperLib::Paths removedAreas{ClipperHelpers::convert(
+        pad.getSceneOutline(*mPlane.getThermalGapWidth()), maxArcTolerance())};
+    // ClipperHelpers::subtract(
+    //    removedAreas,
+    //    {ClipperHelpers::convert(pad.getSceneOutline(), maxArcTolerance())});
+    // Note: Make spokes *slightly* thicker to avoid them to be removed due to
+    // numerical inaccuary of the minimum plane width ensurance operation.
+    const PositiveLength spokeWidth(mPlane.getThermalSpokeWidth() + 10);
+    const PositiveLength spokeLength(
+        std::max(pad.getLibPad().getWidth(), pad.getLibPad().getHeight()) * 2);
+    const Path spoke = Path::centeredRect(spokeWidth, spokeLength);
+    for (const Angle& orientation : {Angle::deg0(), Angle::deg90()}) {
+      const ClipperLib::Paths spokePaths{
+          ClipperHelpers::convert(spoke.rotated(pad.getRotation() + orientation)
+                                      .translated(pad.getPosition()),
+                                  maxArcTolerance())};
+      ClipperHelpers::subtract(removedAreas, spokePaths);
+    }
+    return removedAreas;
   } else {
-    return ClipperLib::Path();
+    // Solid connection (no cutout).
+    return ClipperLib::Paths();
   }
 }
 

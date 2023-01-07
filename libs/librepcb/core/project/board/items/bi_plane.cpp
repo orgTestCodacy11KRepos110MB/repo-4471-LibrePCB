@@ -53,7 +53,8 @@ BI_Plane::BI_Plane(Board& board, const Uuid& uuid,
     mKeepOrphans(false),
     mPriority(0),
     mConnectStyle(ConnectStyle::Solid),
-    // mThermalGapWidth(100000), mThermalSpokeWidth(100000),
+    mThermalGapWidth(300000),
+    mThermalSpokeWidth(200000),
     mGraphicsItem(nullptr),
     mIsVisible(true),
     mFragments() {
@@ -242,6 +243,8 @@ SExpression serialize(const BI_Plane::ConnectStyle& obj) {
   switch (obj) {
     case BI_Plane::ConnectStyle::None:
       return SExpression::createToken("none");
+    case BI_Plane::ConnectStyle::ThermalRelief:
+      return SExpression::createToken("thermal");
     case BI_Plane::ConnectStyle::Solid:
       return SExpression::createToken("solid");
     default:
@@ -254,6 +257,8 @@ BI_Plane::ConnectStyle deserialize(const SExpression& node) {
   const QString str = node.getValue();
   if (str == "none") {
     return BI_Plane::ConnectStyle::None;
+  } else if (str == "thermal") {
+    return BI_Plane::ConnectStyle::ThermalRelief;
   } else if (str == "solid") {
     return BI_Plane::ConnectStyle::Solid;
   } else {

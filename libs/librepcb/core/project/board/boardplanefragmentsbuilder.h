@@ -68,7 +68,7 @@ private:  // Methods
   void removeOrphans();
 
   // Helper Methods
-  ClipperLib::Path createPadCutOut(const BI_FootprintPad& pad) const noexcept;
+  ClipperLib::Paths createPadCutOuts(const BI_FootprintPad& pad) const noexcept;
 
   /**
    * Returns the maximum allowed arc tolerance when flattening arcs. Do not

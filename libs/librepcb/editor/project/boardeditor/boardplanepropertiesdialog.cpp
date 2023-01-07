@@ -90,9 +90,10 @@ BoardPlanePropertiesDialog::BoardPlanePropertiesDialog(
   mUi->cbxConnectStyle->addItem(tr("None"),
                                 static_cast<int>(BI_Plane::ConnectStyle::None));
   mUi->cbxConnectStyle->addItem(
+      tr("Thermal Relief"),
+      static_cast<int>(BI_Plane::ConnectStyle::ThermalRelief));
+  mUi->cbxConnectStyle->addItem(
       tr("Solid"), static_cast<int>(BI_Plane::ConnectStyle::Solid));
-  // mUi->cbxConnectStyle->addItem(tr("Thermals"),
-  // static_cast<int>(BI_Plane::ConnectStyle::Thermal));
   mUi->cbxConnectStyle->setCurrentIndex(mUi->cbxConnectStyle->findData(
       static_cast<int>(mPlane.getConnectStyle())));
 
