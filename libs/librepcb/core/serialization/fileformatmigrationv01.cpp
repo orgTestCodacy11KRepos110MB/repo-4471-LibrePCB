@@ -201,6 +201,14 @@ void FileFormatMigrationV01::upgradeProject(TransactionalDirectory& dir) {
     if (dir.fileExists(fp)) {
       SExpression root = SExpression::parse(dir.read(fp), dir.getAbsPath(fp));
 
+      // Symbols.
+      for (SExpression* symNode : root.getChildren("symbol")) {
+        if (deserialize<bool>(symNode->getChild("mirror/@0"))) {
+          SExpression& rotNode = symNode->getChild("rotation/@0");
+          rotNode = serialize(-deserialize<Angle>(rotNode));
+        }
+      }
+
       // Net segments.
       for (SExpression* segNode : root.getChildren("netsegment")) {
         // Net labels.

@@ -50,7 +50,7 @@ namespace librepcb {
  *     and translate. The order of the transformation is not configurable, it
  *     is hardcoded to the order of transformations applied to symbols within
  *     a schematic, and to footprints within a board. This order is:
- *     rotate CCW -> mirror horizontally (negating X-coordinate) -> translate.
+ *     mirror horizontally (negating X-coordinate) -> rotate CCW -> translate.
  *
  * Long story short, this class converts symbol- or footprint coordinates
  * into schematic- resp. board coordinates.
@@ -208,10 +208,10 @@ public:
   T mapPx(const T& obj) const noexcept {
     QTransform t;
     t.translate(mPosition.toPxQPointF().x(), mPosition.toPxQPointF().y());
+    t.rotate(-mRotation.toDeg());
     if (mMirrored) {
       t.scale(-1, 1);
     }
-    t.rotate(-mRotation.toDeg());
     return t.map(obj);
   }
 

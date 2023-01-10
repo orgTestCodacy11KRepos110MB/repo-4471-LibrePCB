@@ -120,9 +120,8 @@ void SGI_Symbol::setPosition(const Point& pos) noexcept {
 
 void SGI_Symbol::updateRotationAndMirror() noexcept {
   QTransform t;
-  if (mSymbol.getMirrored()) t.scale(qreal(-1), qreal(1));
-  const QTransform revertMirrorTransform = t;
   t.rotate(-mSymbol.getRotation().toDeg());
+  if (mSymbol.getMirrored()) t.scale(qreal(-1), qreal(1));
   setTransform(t);
 
   for (int i = 0; i < std::min(mSymbol.getLibSymbol().getTexts().count(),
@@ -132,13 +131,17 @@ void SGI_Symbol::updateRotationAndMirror() noexcept {
     Q_ASSERT(text);
     auto item = mTextGraphicsItems.at(i);
     Q_ASSERT(item);
+    QTransform revertMirrorTransform;
+    if (mSymbol.getMirrored()) {
+      revertMirrorTransform.scale(qreal(-1), qreal(1));
+    }
     item->setTransform(revertMirrorTransform);
     Transform transform(mSymbol);
     Angle rotation = text->getRotation();
     Alignment alignment = text->getAlign();
     if (mSymbol.getMirrored()) {
-      rotation += Angle::deg180();
-      alignment.mirrorV();
+      rotation = -rotation;
+      alignment.mirrorH();
     }
     if (Toolbox::isTextUpsideDown(transform.map(text->getRotation()), false)) {
       rotation += Angle::deg180();
