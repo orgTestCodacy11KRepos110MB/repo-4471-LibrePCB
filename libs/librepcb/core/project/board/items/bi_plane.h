@@ -96,6 +96,8 @@ public:
   void setMinWidth(const UnsignedLength& minWidth) noexcept;
   void setMinClearance(const UnsignedLength& minClearance) noexcept;
   void setConnectStyle(ConnectStyle style) noexcept;
+  void setThermalGapWidth(const PositiveLength& width) noexcept;
+  void setThermalSpokeWidth(const PositiveLength& width) noexcept;
   void setPriority(int priority) noexcept;
   void setKeepOrphans(bool keepOrphans) noexcept;
   void setVisible(bool visible) noexcept;

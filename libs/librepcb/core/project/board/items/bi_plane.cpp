@@ -121,6 +121,18 @@ void BI_Plane::setConnectStyle(BI_Plane::ConnectStyle style) noexcept {
   }
 }
 
+void BI_Plane::setThermalGapWidth(const PositiveLength& width) noexcept {
+  if (width != mThermalGapWidth) {
+    mThermalGapWidth = width;
+  }
+}
+
+void BI_Plane::setThermalSpokeWidth(const PositiveLength& width) noexcept {
+  if (width != mThermalSpokeWidth) {
+    mThermalSpokeWidth = width;
+  }
+}
+
 void BI_Plane::setPriority(int priority) noexcept {
   if (priority != mPriority) {
     mPriority = priority;

@@ -54,6 +54,10 @@ CmdBoardPlaneEdit::CmdBoardPlaneEdit(BI_Plane& plane,
     mNewMinClearance(mOldMinClearance),
     mOldConnectStyle(plane.getConnectStyle()),
     mNewConnectStyle(mOldConnectStyle),
+    mOldThermalGapWidth(plane.getThermalGapWidth()),
+    mNewThermalGapWidth(mOldThermalGapWidth),
+    mOldThermalSpokeWidth(plane.getThermalSpokeWidth()),
+    mNewThermalSpokeWidth(mOldThermalSpokeWidth),
     mOldPriority(plane.getPriority()),
     mNewPriority(mOldPriority),
     mOldKeepOrphans(plane.getKeepOrphans()),
@@ -133,6 +137,17 @@ void CmdBoardPlaneEdit::setConnectStyle(BI_Plane::ConnectStyle style) noexcept {
   mNewConnectStyle = style;
 }
 
+void CmdBoardPlaneEdit::setThermalGapWidth(
+    const PositiveLength& width) noexcept {
+  Q_ASSERT(!wasEverExecuted());
+  mNewThermalGapWidth = width;
+}
+void CmdBoardPlaneEdit::setThermalSpokeWidth(
+    const PositiveLength& width) noexcept {
+  Q_ASSERT(!wasEverExecuted());
+  mNewThermalSpokeWidth = width;
+}
+
 void CmdBoardPlaneEdit::setPriority(int priority) noexcept {
   Q_ASSERT(!wasEverExecuted());
   mNewPriority = priority;
@@ -156,6 +171,8 @@ bool CmdBoardPlaneEdit::performExecute() {
   if (mNewMinWidth != mOldMinWidth) return true;
   if (mNewMinClearance != mOldMinClearance) return true;
   if (mNewConnectStyle != mOldConnectStyle) return true;
+  if (mNewThermalGapWidth != mOldThermalGapWidth) return true;
+  if (mNewThermalSpokeWidth != mOldThermalSpokeWidth) return true;
   if (mNewPriority != mOldPriority) return true;
   if (mNewKeepOrphans != mOldKeepOrphans) return true;
   return false;
@@ -168,6 +185,8 @@ void CmdBoardPlaneEdit::performUndo() {
   mPlane.setMinWidth(mOldMinWidth);
   mPlane.setMinClearance(mOldMinClearance);
   mPlane.setConnectStyle(mOldConnectStyle);
+  mPlane.setThermalGapWidth(mOldThermalGapWidth);
+  mPlane.setThermalSpokeWidth(mOldThermalSpokeWidth);
   mPlane.setPriority(mOldPriority);
   mPlane.setKeepOrphans(mOldKeepOrphans);
 
@@ -182,6 +201,8 @@ void CmdBoardPlaneEdit::performRedo() {
   mPlane.setMinWidth(mNewMinWidth);
   mPlane.setMinClearance(mNewMinClearance);
   mPlane.setConnectStyle(mNewConnectStyle);
+  mPlane.setThermalGapWidth(mNewThermalGapWidth);
+  mPlane.setThermalSpokeWidth(mNewThermalSpokeWidth);
   mPlane.setPriority(mNewPriority);
   mPlane.setKeepOrphans(mNewKeepOrphans);
 

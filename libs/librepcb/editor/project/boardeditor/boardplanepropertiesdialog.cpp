@@ -59,6 +59,10 @@ BoardPlanePropertiesDialog::BoardPlanePropertiesDialog(
                               settingsPrefix % "/min_width");
   mUi->edtMinClearance->configure(lengthUnit, LengthEditBase::Steps::generic(),
                                   settingsPrefix % "/min_clearance");
+  mUi->edtThermalGap->configure(lengthUnit, LengthEditBase::Steps::generic(),
+                                settingsPrefix % "/thermal_gap");
+  mUi->edtSpokeWidth->configure(lengthUnit, LengthEditBase::Steps::generic(),
+                                settingsPrefix % "/thermal_spoke_width");
   mUi->pathEditorWidget->setLengthUnit(lengthUnit);
   connect(mUi->buttonBox, &QDialogButtonBox::clicked, this,
           &BoardPlanePropertiesDialog::buttonBoxClicked);
@@ -96,6 +100,10 @@ BoardPlanePropertiesDialog::BoardPlanePropertiesDialog(
       tr("Solid"), static_cast<int>(BI_Plane::ConnectStyle::Solid));
   mUi->cbxConnectStyle->setCurrentIndex(mUi->cbxConnectStyle->findData(
       static_cast<int>(mPlane.getConnectStyle())));
+
+  // thermal gap/width spinbox
+  mUi->edtThermalGap->setValue(mPlane.getThermalGapWidth());
+  mUi->edtSpokeWidth->setValue(mPlane.getThermalSpokeWidth());
 
   // priority spinbox
   mUi->spbPriority->setValue(mPlane.getPriority());
@@ -165,6 +173,10 @@ bool BoardPlanePropertiesDialog::applyChanges() noexcept {
     // connect style
     cmd->setConnectStyle(static_cast<BI_Plane::ConnectStyle>(
         mUi->cbxConnectStyle->currentData().toInt()));
+
+    // thermal gap/width spinbox
+    cmd->setThermalGapWidth(mUi->edtThermalGap->getValue());
+    cmd->setThermalSpokeWidth(mUi->edtSpokeWidth->getValue());
 
     // priority
     cmd->setPriority(mUi->spbPriority->value());
