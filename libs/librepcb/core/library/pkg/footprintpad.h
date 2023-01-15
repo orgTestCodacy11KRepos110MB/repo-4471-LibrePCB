@@ -64,6 +64,7 @@ public:
     ShapeChanged,
     WidthChanged,
     HeightChanged,
+    CustomShapeOutlineChanged,
     ComponentSideChanged,
     HolesEdited,
   };
@@ -76,7 +77,8 @@ public:
   FootprintPad(const Uuid& uuid, const tl::optional<Uuid>& pkgPadUuid,
                const Point& pos, const Angle& rot, Shape shape,
                const PositiveLength& width, const PositiveLength& height,
-               ComponentSide side, const HoleList& holes) noexcept;
+               const Path& customShapeOutline, ComponentSide side,
+               const HoleList& holes) noexcept;
   explicit FootprintPad(const SExpression& node);
   ~FootprintPad() noexcept;
 
@@ -90,6 +92,9 @@ public:
   Shape getShape() const noexcept { return mShape; }
   const PositiveLength& getWidth() const noexcept { return mWidth; }
   const PositiveLength& getHeight() const noexcept { return mHeight; }
+  const Path& getCustomShapeOutline() const noexcept {
+    return mCustomShapeOutline;
+  }
   ComponentSide getComponentSide() const noexcept { return mComponentSide; }
   const HoleList& getHoles() const noexcept { return mHoles; }
   HoleList& getHoles() noexcept { return mHoles; }
@@ -107,6 +112,7 @@ public:
   bool setShape(Shape shape) noexcept;
   bool setWidth(const PositiveLength& width) noexcept;
   bool setHeight(const PositiveLength& height) noexcept;
+  bool setCustomShapeOutline(const Path& outline) noexcept;
   bool setComponentSide(ComponentSide side) noexcept;
 
   // General Methods
@@ -144,6 +150,7 @@ private:  // Data
   Shape mShape;
   PositiveLength mWidth;
   PositiveLength mHeight;
+  Path mCustomShapeOutline;  ///< Empty if not needed; implicitly closed
   ComponentSide mComponentSide;
   HoleList mHoles;  ///< If not empty, it's a THT pad.
 

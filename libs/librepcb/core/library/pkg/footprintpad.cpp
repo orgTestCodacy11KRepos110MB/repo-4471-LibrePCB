@@ -104,6 +104,7 @@ FootprintPad::FootprintPad(const FootprintPad& other) noexcept
     mShape(other.mShape),
     mWidth(other.mWidth),
     mHeight(other.mHeight),
+    mCustomShapeOutline(other.mCustomShapeOutline),
     mComponentSide(other.mComponentSide),
     mHoles(other.mHoles),
     mHolesEditedSlot(*this, &FootprintPad::holesEdited) {
@@ -114,7 +115,8 @@ FootprintPad::FootprintPad(const Uuid& uuid,
                            const tl::optional<Uuid>& pkgPadUuid,
                            const Point& pos, const Angle& rot, Shape shape,
                            const PositiveLength& width,
-                           const PositiveLength& height, ComponentSide side,
+                           const PositiveLength& height,
+                           const Path& customShapeOutline, ComponentSide side,
                            const HoleList& holes) noexcept
   : onEdited(*this),
     mUuid(uuid),
@@ -124,6 +126,7 @@ FootprintPad::FootprintPad(const Uuid& uuid,
     mShape(shape),
     mWidth(width),
     mHeight(height),
+    mCustomShapeOutline(customShapeOutline),
     mComponentSide(side),
     mHoles(holes),
     mHolesEditedSlot(*this, &FootprintPad::holesEdited) {
@@ -140,6 +143,7 @@ FootprintPad::FootprintPad(const SExpression& node)
     mShape(deserialize<Shape>(node.getChild("shape/@0"))),
     mWidth(deserialize<PositiveLength>(node.getChild("size/@0"))),
     mHeight(deserialize<PositiveLength>(node.getChild("size/@1"))),
+    mCustomShapeOutline(node),
     mComponentSide(deserialize<ComponentSide>(node.getChild("side/@0"))),
     mHoles(node),
     mHolesEditedSlot(*this, &FootprintPad::holesEdited) {
@@ -275,6 +279,16 @@ bool FootprintPad::setHeight(const PositiveLength& height) noexcept {
   return true;
 }
 
+bool FootprintPad::setCustomShapeOutline(const Path& outline) noexcept {
+  if (outline == mCustomShapeOutline) {
+    return false;
+  }
+
+  mCustomShapeOutline = outline;
+  onEdited.notify(Event::CustomShapeOutlineChanged);
+  return true;
+}
+
 bool FootprintPad::setComponentSide(ComponentSide side) noexcept {
   if (side == mComponentSide) {
     return false;
@@ -300,6 +314,8 @@ void FootprintPad::serialize(SExpression& root) const {
   root.ensureLineBreak();
   root.appendChild("package_pad", mPackagePadUuid);
   root.ensureLineBreak();
+  mCustomShapeOutline.serialize(root);
+  root.ensureLineBreak();
   mHoles.serialize(root);
   root.ensureLineBreak();
 }
@@ -316,6 +332,7 @@ bool FootprintPad::operator==(const FootprintPad& rhs) const noexcept {
   if (mShape != rhs.mShape) return false;
   if (mWidth != rhs.mWidth) return false;
   if (mHeight != rhs.mHeight) return false;
+  if (mCustomShapeOutline != rhs.mCustomShapeOutline) return false;
   if (mComponentSide != rhs.mComponentSide) return false;
   if (mHoles != rhs.mHoles) return false;
   return true;
@@ -332,6 +349,7 @@ FootprintPad& FootprintPad::operator=(const FootprintPad& rhs) noexcept {
   setShape(rhs.mShape);
   setWidth(rhs.mWidth);
   setHeight(rhs.mHeight);
+  setCustomShapeOutline(rhs.mCustomShapeOutline);
   setComponentSide(rhs.mComponentSide);
   mHoles = rhs.mHoles;
   return *this;

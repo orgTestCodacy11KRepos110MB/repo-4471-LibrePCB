@@ -93,6 +93,7 @@ TEST_F(FootprintPadTest, testSerializeAndDeserialize) {
   FootprintPad obj1(
       Uuid::createRandom(), Uuid::createRandom(), Point(123, 567), Angle(789),
       FootprintPad::Shape::OCTAGON, PositiveLength(123), PositiveLength(456),
+      Path({Vertex(Point(1, 2), Angle(3)), Vertex(Point(4, 5), Angle(6))}),
       FootprintPad::ComponentSide::Top,
       HoleList{
           std::make_shared<Hole>(Uuid::createRandom(), PositiveLength(100000),

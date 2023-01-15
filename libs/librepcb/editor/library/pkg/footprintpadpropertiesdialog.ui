@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
+    <width>587</width>
     <height>325</height>
    </rect>
   </property>
@@ -212,6 +212,26 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tabCustomShape">
+      <attribute name="title">
+       <string>Custom Shape</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>The shape of this custom, implicitly closed polygon is added only to the outer copper layers. Coordinates are relative to the pad origin and before rotation.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="librepcb::editor::PathEditorWidget" name="customShapePathEditor" native="true"/>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="tabHoles">
       <attribute name="title">
        <string>Plated Holes</string>
@@ -261,7 +281,7 @@
             <string>Remove current hole</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="../../../../../img/images.qrc">
              <normaloff>:/img/actions/minus.png</normaloff>:/img/actions/minus.png</iconset>
            </property>
           </widget>
@@ -275,7 +295,7 @@
             <string notr="true"/>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="../../../../../img/images.qrc">
              <normaloff>:/img/actions/add.png</normaloff>:/img/actions/add.png</iconset>
            </property>
           </widget>
@@ -346,6 +366,12 @@
    <header location="global">librepcb/editor/widgets/holeeditorwidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>librepcb::editor::PathEditorWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">librepcb/editor/widgets/patheditorwidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>cbxPackagePad</tabstop>
@@ -357,6 +383,8 @@
   <tabstop>edtPosY</tabstop>
   <tabstop>edtRotation</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../../../img/images.qrc"/>
+ </resources>
  <connections/>
 </ui>

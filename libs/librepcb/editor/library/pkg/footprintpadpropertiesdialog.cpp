@@ -61,6 +61,7 @@ FootprintPadPropertiesDialog::FootprintPadPropertiesDialog(
   mUi->edtPosY->configure(lengthUnit, LengthEditBase::Steps::generic(),
                           settingsPrefix % "/pos_y");
   mUi->edtRotation->setSingleStep(90.0);  // [°]
+  mUi->customShapePathEditor->setLengthUnit(lengthUnit);
   mUi->holeEditorWidget->configureClientSettings(
       lengthUnit, settingsPrefix % "/hole_editor");
   connect(mUi->lblHoleDetails, &QLabel::linkActivated, this,
@@ -150,6 +151,7 @@ FootprintPadPropertiesDialog::FootprintPadPropertiesDialog(
   mUi->edtPosX->setValue(mPad.getPosition().getX());
   mUi->edtPosY->setValue(mPad.getPosition().getY());
   mUi->edtRotation->setValue(mPad.getRotation());
+  mUi->customShapePathEditor->setPath(mPad.getCustomShapeOutline());
   updateGeneralTabHoleWidgets();
   setSelectedHole(0);
 
@@ -181,6 +183,7 @@ void FootprintPadPropertiesDialog::setReadOnly(bool readOnly) noexcept {
   mUi->edtRotation->setReadOnly(readOnly);
   mUi->btnRemoveHole->setVisible(!readOnly);
   mUi->btnAddHole->setVisible(!readOnly);
+  mUi->customShapePathEditor->setReadOnly(readOnly);
   mUi->holeEditorWidget->setReadOnly(readOnly);
   if (readOnly) {
     mUi->buttonBox->setStandardButtons(QDialogButtonBox::StandardButton::Close);
@@ -295,6 +298,7 @@ bool FootprintPadPropertiesDialog::applyChanges() noexcept {
     }
     cmd->setWidth(mUi->edtWidth->getValue(), false);
     cmd->setHeight(mUi->edtHeight->getValue(), false);
+    cmd->setCustomShapeOutline(mUi->customShapePathEditor->getPath());
     cmd->setHoles(mHoles, false);
     cmd->setPosition(Point(mUi->edtPosX->getValue(), mUi->edtPosY->getValue()),
                      false);

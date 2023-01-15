@@ -416,6 +416,7 @@ std::pair<std::shared_ptr<PackagePad>, std::shared_ptr<FootprintPad> >
           shape,  // Shape
           width,  // Width
           height,  // Height
+          Path(),  // Custom shape outline
           FootprintPad::ComponentSide::Top,  // Side
           HoleList{std::make_shared<Hole>(
               Uuid::createRandom(),
@@ -449,6 +450,7 @@ std::pair<std::shared_ptr<PackagePad>, std::shared_ptr<FootprintPad> >
           FootprintPad::Shape::RECT,  // Shape
           PositiveLength(convertLength(p.getWidth())),  // Width
           PositiveLength(convertLength(p.getHeight())),  // Height
+          Path(),  // Custom shape outline
           side,  // Side
           HoleList{}  // Holes
           ));

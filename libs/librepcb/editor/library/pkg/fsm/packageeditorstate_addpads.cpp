@@ -60,6 +60,7 @@ PackageEditorState_AddPads::PackageEditorState_AddPads(Context& context,
         FootprintPad::Shape::ROUND,  // Commonly used pad shape
         PositiveLength(2500000),  // There is no default/recommended pad size
         PositiveLength(1300000),  // -> choose reasonable multiple of 0.1mm
+        Path(),  // Custom shape outline
         FootprintPad::ComponentSide::Top,  // Default side
         HoleList{}) {
   if (mPadType == PadType::SMT) {
@@ -309,7 +310,8 @@ bool PackageEditorState_AddPads::startAddPad(const Point& pos) noexcept {
     mCurrentPad = std::make_shared<FootprintPad>(
         Uuid::createRandom(), mLastPad.getPackagePadUuid(),
         mLastPad.getPosition(), mLastPad.getRotation(), mLastPad.getShape(),
-        mLastPad.getWidth(), mLastPad.getHeight(), mLastPad.getComponentSide(),
+        mLastPad.getWidth(), mLastPad.getHeight(),
+        mLastPad.getCustomShapeOutline(), mLastPad.getComponentSide(),
         HoleList{});
     for (const Hole& hole : mLastPad.getHoles()) {
       mCurrentPad->getHoles().append(std::make_shared<Hole>(
