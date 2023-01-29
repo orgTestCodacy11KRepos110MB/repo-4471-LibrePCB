@@ -160,11 +160,13 @@ void BoardPlaneFragmentsBuilder::subtractOtherObjects() {
     foreach (const BI_FootprintPad* pad, device->getPads()) {
       if (!pad->isOnLayer(*mPlane.getLayerName())) continue;
       if (pad->getCompSigInstNetSignal() == &mPlane.getNetSignal()) {
-        ClipperLib::Path path =
-            ClipperHelpers::convert(pad->getSceneOutline(), maxArcTolerance());
-        mConnectedNetSignalAreas.push_back(path);
+        ClipperLib::Paths paths = ClipperHelpers::convert(
+            pad->getSceneOutlinesOnLayer(*mPlane.getLayerName()),
+            maxArcTolerance());
+        mConnectedNetSignalAreas.insert(mConnectedNetSignalAreas.end(),
+                                        paths.begin(), paths.end());
       }
-      c.AddPath(createPadCutOut(*pad), ClipperLib::ptClip, true);
+      c.AddPaths(createPadCutOuts(*pad), ClipperLib::ptClip, true);
     }
   }
 
@@ -251,16 +253,18 @@ void BoardPlaneFragmentsBuilder::removeOrphans() {
  *  Helper Methods
  ******************************************************************************/
 
-ClipperLib::Path BoardPlaneFragmentsBuilder::createPadCutOut(
+ClipperLib::Paths BoardPlaneFragmentsBuilder::createPadCutOuts(
     const BI_FootprintPad& pad) const noexcept {
   bool differentNetSignal =
       (pad.getCompSigInstNetSignal() != &mPlane.getNetSignal());
   if ((mPlane.getConnectStyle() == BI_Plane::ConnectStyle::None) ||
       differentNetSignal) {
     return ClipperHelpers::convert(
-        pad.getSceneOutline(*mPlane.getMinClearance()), maxArcTolerance());
+        pad.getSceneOutlinesOnLayer(*mPlane.getLayerName(),
+                                    mPlane.getMinClearance()),
+        maxArcTolerance());
   } else {
-    return ClipperLib::Path();
+    return ClipperLib::Paths();
   }
 }
 

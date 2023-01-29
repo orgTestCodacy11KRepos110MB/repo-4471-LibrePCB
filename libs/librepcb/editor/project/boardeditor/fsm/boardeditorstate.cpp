@@ -326,9 +326,9 @@ QList<BI_Base*> BoardEditorState::findItemsAtPos(
               (!netsignals.contains(pad->getCompSigInstNetSignal()))) {
             continue;
           }
-          if (cuLayer && (!pad->isOnLayer(cuLayer->getName()))) {
-            continue;
-          }
+          // if (cuLayer && (!pad->isOnLayer(cuLayer->getName()))) {
+          //  continue;
+          //}
           processItem(pad, pad->getPosition(),
                       50 + (pad->getMirrored() ? 300 : 100));
         }

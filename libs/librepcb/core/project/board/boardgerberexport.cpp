@@ -707,7 +707,7 @@ void BoardGerberExport::drawDevice(GerberGenerator& gen,
 void BoardGerberExport::drawFootprintPad(GerberGenerator& gen,
                                          const BI_FootprintPad& pad,
                                          const QString& layerName) const {
-  bool isSmt = !pad.getLibPad().isTht();
+  /*bool isSmt = !pad.getLibPad().isTht();
   bool isOnCopperLayer = pad.isOnLayer(layerName);
   bool isOnSolderMaskTop = pad.isOnLayer(GraphicsLayer::sTopCopper) &&
       (layerName == GraphicsLayer::sTopStopMask);
@@ -791,7 +791,7 @@ void BoardGerberExport::drawFootprintPad(GerberGenerator& gen,
       break;
     }
     default: { throw LogicError(__FILE__, __LINE__); }
-  }
+  }*/
 }
 
 std::unique_ptr<ExcellonGenerator> BoardGerberExport::createExcellonGenerator(

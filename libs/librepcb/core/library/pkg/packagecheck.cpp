@@ -215,17 +215,17 @@ void PackageCheck::checkPadsClearanceToPlacement(MsgList& msgs) const {
       Path stopMaskPath = pad->getOutline(clearance - tolerance);
       stopMaskPath.rotate(pad->getRotation()).translate(pad->getPosition());
       QPainterPath stopMask = stopMaskPath.toQPainterPathPx();
-      if (pad->isOnLayer(GraphicsLayer::sTopCopper) &&
-          stopMask.intersects(topPlacement)) {
-        msgs.append(std::make_shared<MsgPadOverlapsWithPlacement>(
-            footprint, pad, pkgPad ? *pkgPad->getName() : QString(),
-            clearance));
-      } else if (pad->isOnLayer(GraphicsLayer::sBotCopper) &&
-                 stopMask.intersects(botPlacement)) {
-        msgs.append(std::make_shared<MsgPadOverlapsWithPlacement>(
-            footprint, pad, pkgPad ? *pkgPad->getName() : QString(),
-            clearance));
-      }
+      // if (pad->isOnLayer(GraphicsLayer::sTopCopper) &&
+      //    stopMask.intersects(topPlacement)) {
+      //  msgs.append(std::make_shared<MsgPadOverlapsWithPlacement>(
+      //      footprint, pad, pkgPad ? *pkgPad->getName() : QString(),
+      //      clearance));
+      //} else if (pad->isOnLayer(GraphicsLayer::sBotCopper) &&
+      //           stopMask.intersects(botPlacement)) {
+      //  msgs.append(std::make_shared<MsgPadOverlapsWithPlacement>(
+      //      footprint, pad, pkgPad ? *pkgPad->getName() : QString(),
+      //      clearance));
+      //}
     }
   }
 }

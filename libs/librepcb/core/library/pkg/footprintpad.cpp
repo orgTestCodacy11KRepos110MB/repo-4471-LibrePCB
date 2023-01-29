@@ -153,10 +153,8 @@ FootprintPad::~FootprintPad() noexcept {
  *  Getters
  ******************************************************************************/
 
-QString FootprintPad::getLayerName() const noexcept {
-  if (isTht()) {
-    return GraphicsLayer::sBoardPadsTht;
-  } else if (mComponentSide == ComponentSide::Bottom) {
+QString FootprintPad::getComponentSideLayerName() const noexcept {
+  if (mComponentSide == ComponentSide::Bottom) {
     return GraphicsLayer::sBotCopper;
   } else {
     Q_ASSERT(mComponentSide == ComponentSide::Top);
@@ -172,7 +170,7 @@ bool FootprintPad::isOnLayer(const QString& name) const noexcept {
   if (isTht()) {
     return GraphicsLayer::isCopperLayer(name);
   } else {
-    return (name == getLayerName());
+    return (name == getComponentSideLayerName());
   }
 }
 
@@ -198,20 +196,22 @@ Path FootprintPad::getOutline(const Length& expansion) const noexcept {
   return Path();
 }
 
-QPainterPath FootprintPad::toQPainterPathPx(const Length& expansion) const
-    noexcept {
-  QPainterPath holesArea;
-  for (const Hole& h : mHoles) {
-    for (const Path& p : h.getPath()->toOutlineStrokes(h.getDiameter())) {
-      holesArea.addPath(p.toQPainterPathPx());
-    }
-  }
-
-  QPainterPath p = getOutline(expansion).toQPainterPathPx();
-  p.setFillRule(Qt::OddEvenFill);  // Important to subtract the holes!
-  p.addPath(holesArea);
-  return p;
-}
+// QPainterPath FootprintPad::toQPainterPathPx(const Length& expansion, const
+// UnsignedLength& annularWidth) const
+//    noexcept {
+//  QPainterPath holesArea;
+//  for (const Hole& h : mHoles) {
+//    for (const Path& p : h.getPath()->toOutlineStrokes(h.getDiameter() +
+//    UnsignedLength(annularWidth * 2))) {
+//      holesArea.addPath(p.toQPainterPathPx());
+//    }
+//  }
+//
+//  QPainterPath p = getOutline(expansion).toQPainterPathPx();
+//  p.setFillRule(Qt::OddEvenFill);  // Important to subtract the holes!
+//  p.addPath(holesArea);
+//  return p;
+//}
 
 /*******************************************************************************
  *  Setters

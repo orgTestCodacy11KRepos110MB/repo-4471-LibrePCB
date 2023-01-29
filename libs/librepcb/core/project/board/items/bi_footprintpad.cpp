@@ -30,6 +30,7 @@
 #include "../../circuit/componentinstance.h"
 #include "../../circuit/componentsignalinstance.h"
 #include "../../circuit/netsignal.h"
+#include "../boarddesignrules.h"
 #include "bi_device.h"
 #include "bi_netsegment.h"
 
@@ -117,11 +118,23 @@ QString BI_FootprintPad::getDisplayText() const noexcept {
   }
 }
 
-QString BI_FootprintPad::getLayerName() const noexcept {
+FootprintPad::ComponentSide BI_FootprintPad::getComponentSide() const noexcept {
+  if (getMirrored()) {
+    return (mFootprintPad->getComponentSide() ==
+            FootprintPad::ComponentSide::Top)
+        ? FootprintPad::ComponentSide::Bottom
+        : FootprintPad::ComponentSide::Top;
+  } else {
+    return mFootprintPad->getComponentSide();
+  }
+}
+
+QString BI_FootprintPad::getComponentSideLayerName() const noexcept {
   if (getMirrored())
-    return GraphicsLayer::getMirroredLayerName(mFootprintPad->getLayerName());
+    return GraphicsLayer::getMirroredLayerName(
+        mFootprintPad->getComponentSideLayerName());
   else
-    return mFootprintPad->getLayerName();
+    return mFootprintPad->getComponentSideLayerName();
 }
 
 bool BI_FootprintPad::isOnLayer(const QString& layerName) const noexcept {
@@ -182,15 +195,15 @@ void BI_FootprintPad::registerNetLine(BI_NetLine& netline) {
                  getPadNameOrUuid(), getComponentInstanceName(),
                  getLibraryDeviceName(), getNetSignalName()));
   }
-  if (!isOnLayer(netline.getLayer().getName())) {
-    throw RuntimeError(
-        __FILE__, __LINE__,
-        QString("Trace on layer \"%1\" cannot be connected to the pad \"%2\" "
-                "of device \"%3\" (%4) since it is on layer \"%5\".")
-            .arg(netline.getLayer().getName(), getPadNameOrUuid(),
-                 getComponentInstanceName(), getLibraryDeviceName(),
-                 getLayerName()));
-  }
+  // if (!isOnLayer(netline.getLayer().getName())) {
+  //  throw RuntimeError(
+  //      __FILE__, __LINE__,
+  //      QString("Trace on layer \"%1\" cannot be connected to the pad \"%2\" "
+  //              "of device \"%3\" (%4) since it is on layer \"%5\".")
+  //          .arg(netline.getLayer().getName(), getPadNameOrUuid(),
+  //               getComponentInstanceName(), getLibraryDeviceName(),
+  //               getLayerName()));
+  //}
   foreach (const BI_NetLine* l, mRegisteredNetLines) {
     if (&l->getNetSegment() != &netline.getNetSegment()) {
       throw RuntimeError(
@@ -249,17 +262,131 @@ void BI_FootprintPad::setSelected(bool selected) noexcept {
   mGraphicsItem->update();
 }
 
-Path BI_FootprintPad::getOutline(const Length& expansion) const noexcept {
-  return mFootprintPad->getOutline(expansion);
+/*QVector<Path> BI_FootprintPad::getAnnularRingOutlines() const noexcept {
+  QVector<Path> paths;
+  for (const Hole& h : mFootprintPad->getHoles()) {
+    const UnsignedLength annularWidth =
+        mBoard.getDesignRules().calcPadAnnularRing(*h.getDiameter());
+    paths.append(h.getPath()->toOutlineStrokes(
+        h.getDiameter() + UnsignedLength(annularWidth * 2)));
+  }
+  return paths;
+}*/
+
+QVector<Path> BI_FootprintPad::getOutlinesOnLayer(
+    const QString& layerName, const UnsignedLength& expansion) const noexcept {
+  const bool hasTopSide = mFootprintPad->isTht() ||
+      (getComponentSide() == FootprintPad::ComponentSide::Top);
+  const bool hasBottomSide = mFootprintPad->isTht() ||
+      (getComponentSide() == FootprintPad::ComponentSide::Bottom);
+
+  QVector<Path> p;
+  if (((layerName == GraphicsLayer::sTopCopper) && hasTopSide) ||
+      ((layerName == GraphicsLayer::sBotCopper) && hasBottomSide)) {
+    // Outer copper.
+    p.append(mFootprintPad->getOutline(*expansion));
+  } else if (GraphicsLayer::isCopperLayer(layerName) &&
+             GraphicsLayer::isInnerLayer(layerName)) {
+    // Inner copper (annular rings).
+    for (const Hole& h : mFootprintPad->getHoles()) {
+      const UnsignedLength totalExpansion =
+          mBoard.getDesignRules().calcPadAnnularRing(*h.getDiameter()) +
+          expansion;
+      p.append(h.getPath()->toOutlineStrokes(
+          h.getDiameter() + UnsignedLength(totalExpansion * 2)));
+    }
+  } else if (((layerName == GraphicsLayer::sTopStopMask) && hasTopSide) ||
+             ((layerName == GraphicsLayer::sBotStopMask) && hasBottomSide)) {
+    // Stop mask.
+    const PositiveLength size =
+        qMin(mFootprintPad->getWidth(), mFootprintPad->getHeight());
+    const Length totalExpansion =
+        *mBoard.getDesignRules().calcStopMaskClearance(*size) + expansion;
+    p.append(mFootprintPad->getOutline(totalExpansion));
+  } else if (((layerName == GraphicsLayer::sTopSolderPaste) && hasTopSide) ||
+             ((layerName == GraphicsLayer::sBotSolderPaste) && hasBottomSide)) {
+    // Solder paste.
+    const PositiveLength size =
+        qMin(mFootprintPad->getWidth(), mFootprintPad->getHeight());
+    const Length totalExpansion =
+        *mBoard.getDesignRules().calcCreamMaskClearance(*size) + expansion;
+    p.append(mFootprintPad->getOutline(totalExpansion));
+  }
+  return p;
 }
 
-Path BI_FootprintPad::getSceneOutline(const Length& expansion) const noexcept {
-  const Path path = getOutline(expansion)
-                        .rotated(mFootprintPad->getRotation())
-                        .translated(mFootprintPad->getPosition());
+QPainterPath BI_FootprintPad::toQPainterPath(const QString& layerName) const
+    noexcept {
+  const QVector<Path> outlines = getOutlinesOnLayer(layerName);
+  if (outlines.isEmpty()) {
+    return QPainterPath();
+  }
+
+  QPainterPath p;
+  p.setFillRule(Qt::OddEvenFill);  // Important to subtract the holes!
+  p.addPath(Path::toQPainterPathPx(outlines, true));
+  if (GraphicsLayer::isCopperLayer(layerName) ||
+      (layerName == GraphicsLayer::sBoardPadsTht)) {
+    QPainterPath holeAreas;
+    for (const Hole& hole : mFootprintPad->getHoles()) {
+      for (const Path& path :
+           hole.getPath()->toOutlineStrokes(hole.getDiameter())) {
+        holeAreas.addPath(path.toQPainterPathPx());
+      }
+    }
+    p.addPath(holeAreas);
+  }
+  return p;
+}
+
+/*QPainterPath BI_FootprintPad::toHolesQPainterPath(bool withAnnularRing) const
+    noexcept {
+  QPainterPath p;
+  for (const Hole& hole : mFootprintPad->getHoles()) {
+    const UnsignedLength expansion(
+        withAnnularRing
+            ? (mBoard.getDesignRules().calcPadAnnularRing(*hole.getDiameter()) *
+               2)
+            : 0);
+    for (const Path& path :
+         hole.getPath()->toOutlineStrokes(hole.getDiameter() + expansion)) {
+      p.addPath(path.toQPainterPathPx());
+    }
+  }
+  return p;
+}
+
+QPainterPath BI_FootprintPad::toAnnularRingQPainterPath() const noexcept {
+  QPainterPath p;
+  p.setFillRule(Qt::OddEvenFill);  // Important to subtract the holes!
+  p.addPath(toHolesQPainterPath(true));
+  p.addPath(toHolesQPainterPath(false));
+  return p;
+}
+
+QPainterPath BI_FootprintPad::toOuterQPainterPath() const noexcept {
+  QPainterPath p;
+  p.setFillRule(Qt::OddEvenFill);  // Important to subtract the holes!
+  p.addPath(getOutline().toQPainterPathPx());
+  p.addPath(toHolesQPainterPath(true));
+  return p;
+}*/
+
+// Path BI_FootprintPad::getOutline(const Length& expansion) const noexcept {
+//  return mFootprintPad->getOutline(expansion);
+//}
+
+QVector<Path> BI_FootprintPad::getSceneOutlinesOnLayer(
+    const QString& layerName, const UnsignedLength& expansion) const noexcept {
   const Transform transform(mDevice.getPosition(), mDevice.getRotation(),
                             mDevice.getMirrored());
-  return transform.map(path);
+
+  QVector<Path> paths = getOutlinesOnLayer(layerName, expansion);
+  for (Path& path : paths) {
+    path = transform.map(path.rotated(mFootprintPad->getRotation())
+                             .translated(mFootprintPad->getPosition()));
+  }
+  return paths;
 }
 
 TraceAnchor BI_FootprintPad::toTraceAnchor() const noexcept {

@@ -369,9 +369,10 @@ void FileFormatMigrationV01::upgradeProject(TransactionalDirectory& dir,
 
       upgradeGrid(root);
 
-      // Design rules.
+      // Design rules -> design parameters.
       {
         SExpression& node = root.getChild("design_rules");
+        node.setName("design_parameters");
         for (SExpression* child : node.getChildren(SExpression::Type::List)) {
           QString name = child->getName();
           name.replace("restring_pad_", "pad_annular_ring_");

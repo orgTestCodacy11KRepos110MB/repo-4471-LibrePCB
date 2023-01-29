@@ -69,7 +69,7 @@ private:  // Methods
   void removeOrphans();
 
   // Helper Methods
-  ClipperLib::Path createPadCutOut(const BI_FootprintPad& pad) const noexcept;
+  ClipperLib::Paths createPadCutOuts(const BI_FootprintPad& pad) const noexcept;
   ClipperLib::Path createViaCutOut(const BI_Via& via) const noexcept;
 
   /**

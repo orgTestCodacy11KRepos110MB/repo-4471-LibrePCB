@@ -50,11 +50,8 @@ BGI_FootprintPad::BGI_FootprintPad(BI_FootprintPad& pad) noexcept
   : BGI_Base(),
     mPad(pad),
     mLibPad(pad.getLibPad()),
-    mPadLayer(nullptr),
-    mTopStopMaskLayer(nullptr),
-    mBottomStopMaskLayer(nullptr),
-    mTopCreamMaskLayer(nullptr),
-    mBottomCreamMaskLayer(nullptr),
+    mMainLayer(nullptr),
+    mContent(),
     mOnLayerEditedSlot(*this, &BGI_FootprintPad::layerEdited) {
   mFont = qApp->getDefaultSansSerifFont();
   mFont.setPixelSize(1);
@@ -70,7 +67,7 @@ BGI_FootprintPad::~BGI_FootprintPad() noexcept {
  ******************************************************************************/
 
 bool BGI_FootprintPad::isSelectable() const noexcept {
-  return mPadLayer && mPadLayer->isVisible();
+  return mMainLayer && mMainLayer->isVisible();
 }
 
 /*******************************************************************************
@@ -92,40 +89,23 @@ void BGI_FootprintPad::updateCacheAndRepaint() noexcept {
 
   // set layers
   disconnectLayerEditedSlots();
-  mPadLayer = getLayer(mLibPad.getLayerName());
-  if (mLibPad.isTht()) {
-    mTopStopMaskLayer = getLayer(GraphicsLayer::sTopStopMask);
-    mBottomStopMaskLayer = getLayer(GraphicsLayer::sBotStopMask);
-    mTopCreamMaskLayer = nullptr;
-    mBottomCreamMaskLayer = nullptr;
-  } else if (mLibPad.getComponentSide() ==
-             FootprintPad::ComponentSide::Bottom) {
-    mTopStopMaskLayer = nullptr;
-    mBottomStopMaskLayer = getLayer(GraphicsLayer::sBotStopMask);
-    mTopCreamMaskLayer = nullptr;
-    mBottomCreamMaskLayer = getLayer(GraphicsLayer::sBotSolderPaste);
-  } else {
-    mTopStopMaskLayer = getLayer(GraphicsLayer::sTopStopMask);
-    mBottomStopMaskLayer = nullptr;
-    mTopCreamMaskLayer = getLayer(GraphicsLayer::sTopSolderPaste);
-    mBottomCreamMaskLayer = nullptr;
+  mMainLayer = getLayer(mLibPad.isTht() ? GraphicsLayer::sBoardPadsTht
+                                        : mLibPad.getComponentSideLayerName());
+  mContent.clear();
+  mBoundingRect = QRectF();
+  foreach (GraphicsLayer* layer,
+           mPad.getBoard().getLayerStack().getAllLayers()) {
+    const QPainterPath p = mPad.toQPainterPath(layer->getName());
+    if (!p.isEmpty()) {
+      mContent.append(std::make_pair(layer, p));
+      mBoundingRect |= p.boundingRect();
+    }
   }
+  std::reverse(mContent.begin(), mContent.end());
   connectLayerEditedSlots();
   updateVisibility();
 
-  // determine stop/cream mask clearance
-  PositiveLength size = qMin(mLibPad.getWidth(), mLibPad.getHeight());
-  Length stopMaskClearance =
-      *mPad.getBoard().getDesignRules().calcStopMaskClearance(*size);
-  Length creamMaskClearance =
-      -mPad.getBoard().getDesignRules().calcCreamMaskClearance(*size);
-
-  // set shapes and bounding rect
   mShape = mLibPad.getOutline().toQPainterPathPx();
-  mCopper = mLibPad.toQPainterPathPx();
-  mStopMask = mLibPad.getOutline(stopMaskClearance).toQPainterPathPx();
-  mCreamMask = mLibPad.getOutline(creamMaskClearance).toQPainterPathPx();
-  mBoundingRect = mStopMask.boundingRect();
 
   update();
 }
@@ -144,44 +124,28 @@ void BGI_FootprintPad::paint(QPainter* painter,
   bool highlight =
       mPad.isSelected() || (netsignal && netsignal->isHighlighted());
 
-  if (mBottomCreamMaskLayer && mBottomCreamMaskLayer->isVisible()) {
-    // draw bottom cream mask
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(mBottomCreamMaskLayer->getColor(highlight));
-    painter->drawPath(mCreamMask);
-  }
-
-  if (mBottomStopMaskLayer && mBottomStopMaskLayer->isVisible()) {
-    // draw bottom stop mask
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(mBottomStopMaskLayer->getColor(highlight));
-    painter->drawPath(mStopMask);
-  }
-
-  if (mPadLayer && mPadLayer->isVisible()) {
-    // draw pad
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(mPadLayer->getColor(highlight));
-    painter->drawPath(mCopper);
+  if (mMainLayer && mMainLayer->isVisible()) {
+    // draw areas for each layer
+    foreach (const auto& content, mContent) {
+      if (content.first->isEnabled()) {
+        const bool isCopper = content.first->isCopperLayer();
+        GraphicsLayer* layer = isCopper ? mMainLayer : content.first;
+        if (content.first->isVisible()) {
+          painter->setPen(Qt::NoPen);
+          painter->setBrush(layer->getColor(highlight));
+          painter->drawPath(content.second);
+        } else if (isCopper) {
+          painter->setPen(QPen(layer->getColor(highlight), 0));
+          painter->setBrush(Qt::NoBrush);
+          painter->drawPath(content.second);
+        }
+      }
+    }
     // draw pad text
     painter->setFont(mFont);
-    painter->setPen(mPadLayer->getColor(highlight).lighter(150));
+    painter->setPen(mMainLayer->getColor(highlight).lighter(150));
     painter->drawText(mShape.boundingRect(), Qt::AlignCenter,
                       mPad.getDisplayText());
-  }
-
-  if (mTopStopMaskLayer && mTopStopMaskLayer->isVisible()) {
-    // draw top stop mask
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(mTopStopMaskLayer->getColor(highlight));
-    painter->drawPath(mStopMask);
-  }
-
-  if (mTopCreamMaskLayer && mTopCreamMaskLayer->isVisible()) {
-    // draw top cream mask
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(mTopCreamMaskLayer->getColor(highlight));
-    painter->drawPath(mCreamMask);
   }
 }
 
@@ -195,22 +159,14 @@ GraphicsLayer* BGI_FootprintPad::getLayer(QString name) const noexcept {
 }
 
 void BGI_FootprintPad::connectLayerEditedSlots() noexcept {
-  for (GraphicsLayer* layer :
-       {mPadLayer, mTopStopMaskLayer, mBottomStopMaskLayer, mTopCreamMaskLayer,
-        mBottomCreamMaskLayer}) {
-    if (layer) {
-      layer->onEdited.attach(mOnLayerEditedSlot);
-    }
+  foreach (const auto& content, mContent) {
+    content.first->onEdited.attach(mOnLayerEditedSlot);
   }
 }
 
 void BGI_FootprintPad::disconnectLayerEditedSlots() noexcept {
-  for (GraphicsLayer* layer :
-       {mPadLayer, mTopStopMaskLayer, mBottomStopMaskLayer, mTopCreamMaskLayer,
-        mBottomCreamMaskLayer}) {
-    if (layer) {
-      layer->onEdited.detach(mOnLayerEditedSlot);
-    }
+  foreach (const auto& content, mContent) {
+    content.first->onEdited.detach(mOnLayerEditedSlot);
   }
 }
 
@@ -236,10 +192,8 @@ void BGI_FootprintPad::layerEdited(const GraphicsLayer& layer,
 
 void BGI_FootprintPad::updateVisibility() noexcept {
   bool visible = false;
-  for (GraphicsLayer* layer :
-       {mPadLayer, mTopStopMaskLayer, mBottomStopMaskLayer, mTopCreamMaskLayer,
-        mBottomCreamMaskLayer}) {
-    if (layer && layer->isVisible()) {
+  foreach (const auto& content, mContent) {
+    if (content.first->isVisible()) {
       visible = true;
       break;
     }

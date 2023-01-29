@@ -628,7 +628,7 @@ void Board::save() {
       node.appendChild("inner", mLayerStack->getInnerLayerCount());
     }
     root.ensureLineBreak();
-    mDesignRules->serialize(root.appendList("design_rules"));
+    mDesignRules->serialize(root.appendList("design_parameters"));
     root.ensureLineBreak();
     mFabricationOutputSettings->serialize(
         root.appendList("fabrication_output_settings"));

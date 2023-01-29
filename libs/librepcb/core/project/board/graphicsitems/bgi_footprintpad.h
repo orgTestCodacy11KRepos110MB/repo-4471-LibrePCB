@@ -82,15 +82,9 @@ private:  // Data
   const FootprintPad& mLibPad;
 
   // Cached Attributes
-  GraphicsLayer* mPadLayer;
-  GraphicsLayer* mTopStopMaskLayer;
-  GraphicsLayer* mBottomStopMaskLayer;
-  GraphicsLayer* mTopCreamMaskLayer;
-  GraphicsLayer* mBottomCreamMaskLayer;
+  GraphicsLayer* mMainLayer;
+  QVector<std::pair<GraphicsLayer*, QPainterPath>> mContent;
   QPainterPath mShape;
-  QPainterPath mCopper;
-  QPainterPath mStopMask;
-  QPainterPath mCreamMask;
   QRectF mBoundingRect;
   QFont mFont;
 

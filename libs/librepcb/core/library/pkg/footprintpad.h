@@ -93,12 +93,13 @@ public:
   ComponentSide getComponentSide() const noexcept { return mComponentSide; }
   const HoleList& getHoles() const noexcept { return mHoles; }
   HoleList& getHoles() noexcept { return mHoles; }
-  QString getLayerName() const noexcept;
+  QString getComponentSideLayerName() const noexcept;
   bool isTht() const noexcept;
   bool isOnLayer(const QString& name) const noexcept;
   Path getOutline(const Length& expansion = Length(0)) const noexcept;
-  QPainterPath toQPainterPathPx(const Length& expansion = Length(0)) const
-      noexcept;
+  // QPainterPath toQPainterPathPx(const Length& expansion = Length(0), const
+  // UnsignedLength& annularWidth = UnsignedLength(0)) const
+  //    noexcept;
 
   // Setters
   bool setPackagePadUuid(const tl::optional<Uuid>& pad) noexcept;

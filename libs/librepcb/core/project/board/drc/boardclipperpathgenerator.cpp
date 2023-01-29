@@ -270,10 +270,9 @@ void BoardClipperPathGenerator::addCopper(
           (!netsignals.contains(pad->getCompSigInstNetSignal()))) {
         continue;
       }
-      Transform transform(*pad);
       ClipperHelpers::unite(
           mPaths,
-          ClipperHelpers::convert(transform.map(pad->getOutline()),
+          ClipperHelpers::convert(pad->getSceneOutlinesOnLayer(layerName),
                                   mMaxArcTolerance));
     }
   }

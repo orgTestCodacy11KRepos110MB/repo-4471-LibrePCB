@@ -212,20 +212,20 @@ void BoardPainter::initContentByLayer() const noexcept {
       }
 
       // Footprint pads.
-      foreach (FootprintPad pad, footprint.pads) {
-        const Transform transform(pad.getPosition(), pad.getRotation());
-        const QPainterPath path =
-            footprint.transform.mapPx(transform.mapPx(pad.toQPainterPathPx()));
-        const QString layer = footprint.transform.map(pad.getLayerName());
-        mContentByLayer[layer].areas.append(path);
+      // foreach (FootprintPad pad, footprint.pads) {
+      //  const Transform transform(pad.getPosition(), pad.getRotation());
+      //  const QPainterPath path =
+      //      footprint.transform.mapPx(transform.mapPx(pad.toQPainterPathPx()));
+      //  const QString layer = footprint.transform.map(pad.getLayerName());
+      //  mContentByLayer[layer].areas.append(path);
 
-        // Also add the holes for THT pads.
-        for (const Hole& hole : pad.getHoles()) {
-          mContentByLayer[GraphicsLayer::sBoardDrillsNpth].padHoles.append(
-              Hole(hole.getUuid(), hole.getDiameter(),
-                   footprint.transform.map(transform.map(hole.getPath()))));
-        }
-      }
+      //  // Also add the holes for THT pads.
+      //  for (const Hole& hole : pad.getHoles()) {
+      //    mContentByLayer[GraphicsLayer::sBoardDrillsNpth].padHoles.append(
+      //        Hole(hole.getUuid(), hole.getDiameter(),
+      //             footprint.transform.map(transform.map(hole.getPath()))));
+      //  }
+      //}
     }
 
     // Planes.

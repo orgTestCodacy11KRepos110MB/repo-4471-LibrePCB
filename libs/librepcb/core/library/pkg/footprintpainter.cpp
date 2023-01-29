@@ -154,18 +154,19 @@ void FootprintPainter::initContentByLayer() const noexcept {
     }
 
     // Footprint pads.
-    foreach (FootprintPad pad, mPads) {
-      const Transform transform(pad.getPosition(), pad.getRotation());
-      const QPainterPath path = transform.mapPx(pad.toQPainterPathPx());
-      const QString layer = pad.getLayerName();
-      mContentByLayer[layer].areas.append(path);
+    // foreach (FootprintPad pad, mPads) {
+    //  const Transform transform(pad.getPosition(), pad.getRotation());
+    //  const QPainterPath path = transform.mapPx(pad.toQPainterPathPx());
+    //  const QString layer = pad.getLayerName();
+    //  mContentByLayer[layer].areas.append(path);
 
-      // Also add the holes for THT pads.
-      for (const Hole& hole : pad.getHoles()) {
-        mContentByLayer[GraphicsLayer::sBoardDrillsNpth].padHoles.append(Hole(
-            hole.getUuid(), hole.getDiameter(), transform.map(hole.getPath())));
-      }
-    }
+    //  // Also add the holes for THT pads.
+    //  for (const Hole& hole : pad.getHoles()) {
+    //    mContentByLayer[GraphicsLayer::sBoardDrillsNpth].padHoles.append(Hole(
+    //        hole.getUuid(), hole.getDiameter(),
+    //        transform.map(hole.getPath())));
+    //  }
+    //}
 
     // Texts.
     foreach (StrokeText text, mStrokeTexts) {

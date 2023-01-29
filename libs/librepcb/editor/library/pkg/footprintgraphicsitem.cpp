@@ -200,8 +200,8 @@ QList<std::shared_ptr<QGraphicsItem>> FootprintGraphicsItem::findItemsAtPos(
 
   if (flags.testFlag(FindFlag::Pads)) {
     foreach (auto ptr, mPadGraphicsItems) {
-      processItem(std::dynamic_pointer_cast<QGraphicsItem>(ptr),
-                  10 + priorityFromLayer(ptr->getPad()->getLayerName()));
+      // processItem(std::dynamic_pointer_cast<QGraphicsItem>(ptr),
+      //            10 + priorityFromLayer(ptr->getPad()->getLayerName()));
     }
   }
 

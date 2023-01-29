@@ -419,12 +419,12 @@ bool BoardEditorState_DrawTrace::startPositioning(
       if (BI_NetSegment* segment = fixedPad->getNetSegmentOfLines()) {
         mCurrentNetSegment = segment;
       }
-      if (!fixedPad->isOnLayer(layer->getName())) {
-        if (GraphicsLayer* padLayer =
-                board.getLayerStack().getLayer(fixedPad->getLayerName())) {
-          layer = padLayer;
-        }
-      }
+      // if (!fixedPad->isOnLayer(layer->getName())) {
+      //  if (GraphicsLayer* padLayer =
+      //          board.getLayerStack().getLayer(fixedPad->getLayerName())) {
+      //    layer = padLayer;
+      //  }
+      //}
       netsignal = fixedPad->getCompSigInstNetSignal();
       if (!netsignal) {
         // Note: We might remove this restriction some day, but then we should
@@ -453,9 +453,9 @@ bool BoardEditorState_DrawTrace::startPositioning(
         // to pads of no net.
         throwPadNotConnectedException();
       }
-      if (!pad->getLibPad().isTht()) {
-        layer = board.getLayerStack().getLayer(pad->getLayerName());
-      }
+      // if (!pad->getLibPad().isTht()) {
+      //  layer = board.getLayerStack().getLayer(pad->getLayerName());
+      //}
     } else if (BI_NetLine* netline = qobject_cast<BI_NetLine*>(item)) {
       // split netline
       mCurrentNetSegment = &netline->getNetSegment();
